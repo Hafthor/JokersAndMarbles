@@ -153,7 +153,9 @@ class Marble(char letter, int player) {
             } else {
                 pos = (pos + 71 + sign) % 72 + 1;
             }
-            if (sign > 0 && pos > 68) pos -= 74;
+            if (sign > 0 && pos > 68) {
+                pos -= 74;
+            }
             if (sameColorMarbles.Any(m => m != this && m.Position == pos)) {
                 return "Can't hop over same color marble";
             }
@@ -506,7 +508,7 @@ class Game {
                 board.Print(s);
             } else {
                 if (board.Win) {
-                    Console.WriteLine("Players " + board.Turn + "/" + board.Teammate + " wins!");
+                    Console.WriteLine("Players " + board.Turn + " and " + board.Teammate + " win!");
                     break;
                 }
                 board.NextTurn();
