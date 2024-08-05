@@ -115,20 +115,11 @@ class Marble(char letter, int player) {
     public int Teammate => (Player + 2) % 4;
     public int Offset => Player * 18;
     public int Position { get; set; } // 0=home, 1-72=relative board position, -1 to -5=safe
-    public int AbsPosition => (Position + Offset - 1) % 72 + 1;
+    public int AbsPosition => Position > 0 ? (Position + Offset - 1) % 72 + 1 : Position;
     public bool IsHome => Position == 0;
     public bool IsSafe => Position < 0;
     public bool InLimbo => Position > 68; // will be 18*players - 4
 
-    public string CanMove(int steps, bool hostile = false) {
-        int oldPos = Position;
-        string s = Move(steps, hostile);
-        if (s == null) {
-            Position = oldPos;
-        }
-        return s;
-    }
-    
     public string Move(int steps, bool hostile = false) {
         if (hostile) {
             if (IsHome) {
@@ -189,23 +180,24 @@ class Board {
     public List<Player> Players { get; } = new(4);
     public int Turn { get; set; } = 0;
     public int Teammate => (Turn + 2) % 4;
+    public bool Win => Players[Turn].Marbles.All(m => m.IsSafe) && Players[Teammate].Marbles.All(m => m.IsSafe);
     public string[] info = new string[9];
     private readonly Deck deck;
     private char[][] board = """
                              ...................
-                             .  f    t         .
-                             .  g    s         .
-                             .  hij rqp     HIJ.
+                             .  j    t         .
+                             .  i    s         .
+                             .  hgf rqp     HIJ.
                              .              G  .
-                             .    0         F  .
-                             .    1            .
-                             .    2         R  .
-                             .    3         QST.
-                             .  K 4         P  .
-                             .ONL 5            .
-                             .  M 6            .
-                             .    7            .
-                             .  A 8            .
+                             .   0          F  .
+                             .   1             .
+                             .   2          R  .
+                             .   3          QST.
+                             .  K4          P  .
+                             .ONL5             .
+                             .  M6             .
+                             .   7             .
+                             .  A8             .
                              .  B              .
                              .EDC     klm abc  .
                              .         n    d  .
@@ -220,12 +212,11 @@ class Board {
         for (var p = 0; p < letters.Length; p++) {
             Players.Add(new Player(p, deck, letters[p]));
         }
-        for (int i = 0; i < 7; i++) {
+        for (int i = 0; i < 8; i++) {
             info[i] = "";
         }
-        //         123456789012345678
-        info[7] = "-=[ Welcome to ]=-";
-        info[8] = " Jokers & Marbles ";
+        //         1234567890123456789
+        info[8] = "Jokers and Marbles™";
         
         for (int r = 0; r < board.Length; r++) {
             var row = board[r];
@@ -240,8 +231,8 @@ class Board {
     public void Print(string s) {
         while (s.Length > 0) {
             Array.Copy(info, 1, info, 0, 8);
-            info[8] = s.PadRight(18)[..18];
-            s = s.Length > 18 ? s[18..] : "";
+            info[8] = s.PadRight(19)[..19];
+            s = s.Length > 19 ? s[19..] : "";
         }
     }
 
@@ -414,7 +405,7 @@ class Board {
 
     public void Paint() {
         for (int i = 0; i < 9; i++) {
-            info[i] = info[i].PadRight(18)[..18];
+            info[i] = info[i].PadRight(19)[..19];
         }
         string[] safes = ["abcde", "ABCDE", "fghij", "FGHIJ"];
         string[] homes = ["klmno", "KLMNO", "pqrst", "PQRST"];
@@ -458,8 +449,9 @@ class Board {
             for (var j = 0; j < line.Length; j++) {
                 var c = line[j];
                 if (c is >= '0' and <= '9') {
-                    j += 8;
-                    Console.Write(info[c - '0'].PadRight(18)[..18]);
+                    j += 9;
+                    Console.Write(' ');
+                    Console.Write(info[c - '0'].PadRight(19)[..19]);
                 } else {
                     Console.Write(c);
                     Console.Write(' ');
@@ -501,6 +493,10 @@ class Game {
             if (s != null) {
                 board.Print(s);
             } else {
+                if (board.Win) {
+                    Console.WriteLine("Players " + board.Turn + "/" + board.Teammate + " wins!");
+                    break;
+                }
                 board.NextTurn();
             }
         }
