@@ -120,34 +120,45 @@ class Marble(char letter, int player) {
     public bool IsSafe => Position < 0;
     public bool InLimbo => Position > 68; // will be 18*players - 4
 
-    public string Move(int steps, bool hostile = false) {
+    public string Move(int steps, bool hostile, List<Marble> sameColorMarbles) {
         if (hostile) {
             if (IsHome) {
                 return "Can't move marble in home";
             } else if (IsSafe) {
                 return "Cannot move safe marble";
             }
-            Position = (Position - 1 + steps + 72) % 72 + 1;
-            return null;
-        }
-
-        if (steps < 0) {
+        } else if (steps < 0) {
             if (IsHome) {
                 return "Can't back up marble in home";
             } else if (IsSafe) {
                 return "Can't back up safe marble";
             }
-            Position = (Position - 1 + steps + 72) % 72 + 1;
-        } else {
-            if (Position + steps > 68) {
-                if (Position + steps > 73) {
-                    return "Can't move marble past home";
-                }
-                Position = Position + steps - 74;
+        } else if (Position + steps > 73) {
+            return "Can't move marble past home";
+        }
+        
+        // teleport to location (Joker)
+        if (sameColorMarbles == null) {
+            Position = (Position + steps + 71) % 72 + 1;
+            if (Position > 68) {
+                Position -= 74;
+            }
+            return null;
+        }
+
+        int pos = Position, sign = Math.Sign(steps), abs = Math.Abs(steps);
+        for (int i = 0; i < abs; i++) {
+            if (sign > 0 && pos < 0) {
+                pos += sign;
             } else {
-                Position = (Position + steps - 1) % 72 + 1;
+                pos = (pos + 71 + sign) % 72 + 1;
+            }
+            if (sign > 0 && pos > 68) pos -= 74;
+            if (sameColorMarbles.Any(m => m != this && m.Position == pos)) {
+                return "Can't hop over same color marble";
             }
         }
+        Position = pos;
         return null;
     }
 }
@@ -311,6 +322,7 @@ class Board {
                         } else if (click.Player == marble.Player) {
                             return "Can't click same color";
                         }
+                        if (card.Rank == Rank.Joker && marble.Position == 0) marble.Position = 1; // move marble out of home
                         curMove = (72 + click.AbsPosition - marble.AbsPosition - 1) % 72 + 1;
                     } else {
                         if (!int.TryParse(move[1..], out curMove) || curMove == 0) {
@@ -350,7 +362,7 @@ class Board {
                     }
                 }
 
-                string s = marble.Move(curMove, hostile);
+                string s = marble.Move(curMove, hostile, card.IsJoker ? null : Players[marble.Player].Marbles);
                 if (s != null) {
                     return s;
                 }
