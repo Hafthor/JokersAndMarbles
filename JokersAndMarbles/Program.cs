@@ -75,11 +75,11 @@ class Deck {
         cards.RemoveAt(cards.Count - 1);
         return card;
     }
-    
+
     public void Return(Card card) {
         cards.Insert(0, card);
     }
-    
+
     public void Shuffle(Random rnd) {
         for (int i = cards.Count - 1; i > 0; i--) {
             int j = rnd.Next(i + 1);
@@ -89,27 +89,6 @@ class Deck {
 }
 
 class Marble(char letter, int player) {
-    //    3031323334353637383940414243444546
-    //29 o o o o o o o o o o o o o o o o o o o 47
-    //28 x     o         o                   x 48
-    //27 x     o         o                   x 49
-    //26 x     o o o   o o o           x x x x 50
-    //25 x                             x     x 51
-    //24 x                             x     x 52
-    //23 x                                   x 53
-    //22 x                             x     x 54
-    //21 x                             x x x x 55
-    //20 x     x                       x     x 56
-    //19 x x x x                             x 57
-    //18 x     x                             x 58
-    //17 x                                   x 59
-    //16 x     x                             x 60
-    //15 x     x          home 0  -1-2 safe  x 61
-    //14 x x x x           o o o   o o o-3   x 62
-    //13 x                   o         o-4   x 63
-    //12 x                   o         o-5   x 64
-    //11 x o o o o o o o o o o o o o o o o o o 65
-    //    10 9 8 7 6 5 4 3 2 172717069686766
     public char Letter { get; } = letter;
     public int Player { get; } = player;
     public int Teammate => (Player + 2) % 4;
@@ -136,7 +115,7 @@ class Marble(char letter, int player) {
         } else if (Position + steps > 73) {
             return "Can't move marble past home";
         }
-        
+
         // teleport to location (Joker)
         if (sameColorMarbles == null) {
             Position = (Position + steps + 71) % 72 + 1;
@@ -177,7 +156,7 @@ class Player {
             Marbles.Add(new Marble(letter, player));
         }
     }
-    
+
     public void Draw(Deck deck) {
         Hand.Add(deck.Draw());
     }
@@ -195,7 +174,30 @@ class Board {
     public int Teammate => (Turn + 2) % 4;
     public bool Win => Players[Turn].Marbles.All(m => m.IsSafe) && Players[Teammate].Marbles.All(m => m.IsSafe);
     public string[] info = new string[9];
+
     private readonly Deck deck;
+
+    //    3031323334353637383940414243444546
+    //29 o o o o o o o o o o o o o o o o o o o 47
+    //28 x     o         o                   x 48
+    //27 x     o         o                   x 49
+    //26 x     o o o   o o o           x x x x 50
+    //25 x                             x     x 51
+    //24 x                             x     x 52
+    //23 x                                   x 53
+    //22 x                             x     x 54
+    //21 x                             x x x x 55
+    //20 x     x                       x     x 56
+    //19 x x x x                             x 57
+    //18 x     x                             x 58
+    //17 x                                   x 59
+    //16 x     x                             x 60
+    //15 x     x          home 0  -1-2 safe  x 61
+    //14 x x x x           o o o   o o o-3   x 62
+    //13 x                   o         o-4   x 63
+    //12 x                   o         o-5   x 64
+    //11 x o o o o o o o o o o o o o o o o o o 65
+    //    10 9 8 7 6 5 4 3 2 172717069686766
     private char[][] board = """
                              ...................
                              .  j    t         .
@@ -217,11 +219,12 @@ class Board {
                              .         o    e  .
                              ...................
                              """.Split('\n').Select(s => s.ToCharArray()).ToArray();
+
     private Dictionary<char, (int y, int x)> positionForChar = new();
 
     public Board(Deck deck) {
         this.deck = deck;
-        var letters = new[] { "ABCDE", "abcde", "LMNOP", "lmnop" };
+        var letters = new[] { "ABCDE", "abcde", "FGHIJ", "fghij" };
         for (var p = 0; p < letters.Length; p++) {
             Players.Add(new Player(p, deck, letters[p]));
         }
@@ -230,12 +233,12 @@ class Board {
         }
         //         1234567890123456789
         info[8] = "Jokers and Marbles™";
-        
+
         for (int r = 0; r < board.Length; r++) {
             var row = board[r];
             for (int c = 0; c < row.Length; c++) {
-                if (row[c] is >='A' and <= 'z') {
-                    positionForChar[row[c]] = (y:r, x:c);
+                if (row[c] is >= 'A' and <= 'z') {
+                    positionForChar[row[c]] = (y: r, x: c);
                 }
             }
         }
@@ -266,7 +269,7 @@ class Board {
         }
         string[] moves = ss[1..];
         bool splitMove = moves.Length > 1;
-        Card card = Players[Turn].Hand.Find(c => c.ToString() == ss[0]);
+        Card card = Players[Turn].Hand.FirstOrDefault(c => c.ToString() == ss[0], default);
         List<List<Marble>> saveMarbles = null;
         if (card == null) {
             return "Bad card " + ss[0];
@@ -313,9 +316,9 @@ class Board {
                         }
                     }
                 } else { // move specified
-                    Marble click = card.Rank == Rank.Joker
-                        ? Players.SelectMany(p => p.Marbles).FirstOrDefault(m => m.Letter == move[1])
-                        : null;
+                    Marble click = card.Rank != Rank.Joker
+                        ? null
+                        : Players.SelectMany(p => p.Marbles).FirstOrDefault(m => m.Letter == move[1], default);
                     if (click != null) {
                         if (click.IsHome) {
                             return "Can't click home marble";
@@ -324,7 +327,8 @@ class Board {
                         } else if (click.Player == marble.Player) {
                             return "Can't click same color";
                         }
-                        if (card.Rank == Rank.Joker && marble.Position == 0) marble.Position = 1; // move marble out of home
+                        if (card.Rank == Rank.Joker && marble.Position == 0)
+                            marble.Position = 1; // move marble out of home
                         curMove = (72 + click.AbsPosition - marble.AbsPosition - 1) % 72 + 1;
                     } else {
                         if (!int.TryParse(move[1..], out curMove) || curMove == 0) {
@@ -424,11 +428,11 @@ class Board {
         string[] safes = ["abcde", "ABCDE", "fghij", "FGHIJ"];
         string[] homes = ["klmno", "KLMNO", "pqrst", "PQRST"];
         var board = this.board.Select(row => row.ToArray()).ToArray();
-        foreach(var e in positionForChar) {
+        foreach (var e in positionForChar) {
             var (y, x) = e.Value;
             board[y][x] = '.';
         }
-        
+
         for (int i = 0; i < Players.Count; i++) {
             int offset = i * 18;
             var player = Players[i].Marbles;
