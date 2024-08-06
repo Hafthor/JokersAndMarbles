@@ -55,18 +55,20 @@ class Card {
 class Deck {
     private List<Card> cards = [];
 
-    public Deck(int decks = 3) {
-        foreach (Suit suit in Enum.GetValues(typeof(Suit))) {
-            if (suit != Suit.None) {
-                foreach (Rank rank in Enum.GetValues(typeof(Rank))) {
-                    if (rank != Rank.Joker) {
-                        cards.Add(new Card(suit, rank));
+    public Deck(int decks = 3, int jokersPerDeck = 2) {
+        for (int deck = 0; deck < decks; deck++) {
+            foreach (Suit suit in Enum.GetValues(typeof(Suit))) {
+                if (suit != Suit.None) {
+                    foreach (Rank rank in Enum.GetValues(typeof(Rank))) {
+                        if (rank != Rank.Joker) {
+                            cards.Add(new Card(suit, rank));
+                        }
                     }
                 }
             }
-        }
-        for (int i = 0; i < 2; i++) {
-            cards.Add(new Card(Suit.None, Rank.Joker));
+            for (int joker = 0; joker < jokersPerDeck; joker++) {
+                cards.Add(new Card(Suit.None, Rank.Joker));
+            }
         }
     }
 
@@ -81,6 +83,7 @@ class Deck {
     }
 
     public void Shuffle(Random rnd) {
+        // Fisher-Yates shuffle
         for (int i = cards.Count - 1; i > 0; i--) {
             int j = rnd.Next(i + 1);
             (cards[i], cards[j]) = (cards[j], cards[i]);
@@ -145,11 +148,12 @@ class Marble(char letter, int player) {
 }
 
 class Player {
-    public List<Card> Hand { get; } = new(3);
+    public List<Card> Hand { get; }
     public List<Marble> Marbles { get; } = new(5);
 
-    public Player(int player, Deck deck, string letters) {
-        for (int card = 0; card < 3; card++) {
+    public Player(int player, Deck deck, string letters, int cards = 3) {
+        Hand = new(cards);
+        for (int card = 0; card < cards; card++) {
             Hand.Add(deck.Draw());
         }
         foreach (char letter in letters) {
@@ -503,7 +507,7 @@ class Game {
             Console.Clear();
             board.Paint();
             Console.Write("Player " + board.Turn + " (" + string.Join(',', board.Players[board.Turn].Hand) + "):");
-            string sCmd = Console.ReadLine();
+            string sCmd = Console.ReadLine() ?? "";
             if (sCmd == "exit") {
                 break;
             }
