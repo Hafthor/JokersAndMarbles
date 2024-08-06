@@ -331,8 +331,9 @@ class Board {
                         } else if (click.Player == marble.Player) {
                             return "Can't click same color";
                         }
-                        if (card.Rank == Rank.Joker && marble.Position == 0)
+                        if (card.Rank == Rank.Joker && marble.Position == 0) {
                             marble.Position = 1; // move marble out of home
+                        }
                         curMove = (72 + click.AbsPosition - marble.AbsPosition - 1) % 72 + 1;
                     } else {
                         if (!int.TryParse(move[1..], out curMove) || curMove == 0) {
