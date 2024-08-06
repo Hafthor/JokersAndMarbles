@@ -1,9 +1,7 @@
 ﻿namespace JokersAndMarbles;
 
 class Program {
-    static void Main(string[] args) {
-        new Game(new Random(0)).Run();
-    }
+    static void Main(string[] args) => new Game(new Random(0)).Run();
 }
 
 enum Suit {
@@ -53,9 +51,10 @@ class Card {
 }
 
 class Deck {
-    private List<Card> cards = [];
+    private readonly List<Card> cards;
 
     public Deck(int decks = 3, int jokersPerDeck = 2) {
+        cards = new(decks * (52 + jokersPerDeck));
         for (int deck = 0; deck < decks; deck++) {
             foreach (Suit suit in Enum.GetValues(typeof(Suit))) {
                 if (suit != Suit.None) {
@@ -78,12 +77,9 @@ class Deck {
         return card;
     }
 
-    public void Return(Card card) {
-        cards.Insert(0, card);
-    }
+    public void Return(Card card) => cards.Insert(0, card);
 
-    public void Shuffle(Random rnd) {
-        // Fisher-Yates shuffle
+    public void Shuffle(Random rnd) { // Fisher-Yates shuffle
         for (int i = cards.Count - 1; i > 0; i--) {
             int j = rnd.Next(i + 1);
             (cards[i], cards[j]) = (cards[j], cards[i]);
@@ -97,7 +93,7 @@ class Marble(char letter, int player) {
     public int Teammate => (Player + 2) % 4;
     public int Offset => Player * 18;
     public int Position { get; set; } // 0=home, 1-72=relative board position, -1 to -5=safe
-    public int AbsPosition => Position > 0 ? (Position + Offset - 1) % 72 + 1 : Position;
+    public int AbsPosition => Position > 0 ? (Position + Offset - 1) % 72 + 1 : Position; // for non-home/safe marbles
     public bool IsHome => Position == 0;
     public bool IsSafe => Position < 0;
     public bool InLimbo => Position > 68; // will be 18*players - 4
@@ -161,9 +157,7 @@ class Player {
         }
     }
 
-    public void Draw(Deck deck) {
-        Hand.Add(deck.Draw());
-    }
+    public void Draw(Deck deck) => Hand.Add(deck.Draw());
 
     public void Exchange(Deck deck, Card card) {
         Hand.Remove(card);
@@ -224,7 +218,7 @@ class Board {
                              ...................
                              """.Split('\n').Select(s => s.ToCharArray()).ToArray();
 
-    private Dictionary<char, (int y, int x)> positionForChar = new();
+    private Dictionary<char, (int y, int x)> positionForChar = new(5 * 2 * 4 + 9);
 
     public Board(Deck deck) {
         this.deck = deck;
@@ -236,7 +230,7 @@ class Board {
             info[i] = "";
         }
         //         1234567890123456789
-        info[8] = "Jokers and Marbles™";
+        info[8] = "Jokers and Marbles";
 
         for (int r = 0; r < board.Length; r++) {
             var row = board[r];
@@ -484,11 +478,11 @@ class Board {
         }
 
         bool FindAndSet(char[][] board, char find, char set) {
-            if (!positionForChar.TryGetValue(find, out var xy) || board[xy.y][xy.x] != '.') {
-                return false;
+            if (positionForChar.TryGetValue(find, out var xy) && board[xy.y][xy.x] == '.') {
+                board[xy.y][xy.x] = set;
+                return true;
             }
-            board[xy.y][xy.x] = set;
-            return true;
+            return false;
         }
     }
 }
