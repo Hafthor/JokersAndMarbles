@@ -42,12 +42,51 @@ class Card {
         Rank = rank;
     }
 
+    public Card(string str) {
+        if (str[0] == 'J' && str[1] == 'o') {
+            Suit = Suit.None;
+            Rank = Rank.Joker;
+        } else {
+            if (char.IsDigit(str[0])) {
+                Rank = (Rank)int.Parse(str[..1]);
+            } else {
+                foreach (var r in Enum.GetValues(typeof(Rank))) {
+                    if (str[0] == r.ToString()[0]) {
+                        Rank = (Rank)r;
+                        break;
+                    }
+                }
+            }
+            foreach (var s in Enum.GetValues(typeof(Suit))) {
+                if (str[1] == s.ToString()[0]) {
+                    Suit = (Suit)s;
+                    break;
+                }
+            }
+        }
+    }
+
     public override string ToString() => IsJoker
         ? "Jo"
         : (IsAceOrFace || Rank == Rank.Ten ? Rank.ToString()[..1] : ((int)Rank).ToString()) + "" +
           char.ToLower(Suit.ToString()[0]);
 
     public int Value => Rank == Rank.Eight ? -8 : (int)Rank;
+
+    public int Worth => Rank switch {
+        Rank.Joker => 21,
+        Rank.Ten => 20,
+        Rank.Nine => 15,
+        Rank.Eight => 12,
+        Rank.Seven => 11,
+        Rank.Ace => 10,
+        Rank.King => 7,
+        Rank.Queen => 6,
+        Rank.Jack => 5,
+        Rank.Two => 2,
+        Rank.Three => 1,
+        _ => 0
+    };
 }
 
 class Deck {
@@ -72,12 +111,24 @@ class Deck {
     }
 
     public Card Draw() {
-        var card = cards[^1];
+        Card card = cards[^1];
         cards.RemoveAt(cards.Count - 1);
         return card;
     }
-
-    public void Return(Card card) => cards.Insert(0, card);
+    
+    public Card UseAndDraw(Card card) {
+        cards.Insert(0, card);
+        card = cards[^1];
+        cards.RemoveAt(cards.Count - 1);
+        return card;
+    }
+    
+    public List<Card> SaveCards() => new(cards);
+    
+    public void RestoreCards(List<Card> saveCards) {
+        cards.Clear();
+        cards.AddRange(saveCards);
+    }
 
     public void Shuffle(Random rnd) { // Fisher-Yates shuffle
         for (int i = cards.Count - 1; i > 0; i--) {
@@ -124,6 +175,7 @@ class Marble(char letter, int player) {
             return null;
         }
 
+        // go step by step to see if there's a same color marble in the way
         int pos = Position, sign = Math.Sign(steps), abs = Math.Abs(steps);
         for (int i = 0; i < abs; i++) {
             if (sign > 0 && pos < 0) {
@@ -141,6 +193,17 @@ class Marble(char letter, int player) {
         Position = pos;
         return null;
     }
+
+    public int Score() {
+        if (InLimbo) return 0; // worst possible score would be 10 across 5 marbles (1=home, 4=limbo)
+        if (IsHome) return 10; // start is 50 across 5 marbles
+        if (IsSafe) return 115 + Position * 5; // win is 500 across 5 marbles
+        if (Position is >= 1 and <= 4) return 30 - Position;
+        int score = 83 - (73 - Position);
+        if (Position is 1 + 18 or 1 + 54) score -= 10; // opponent start
+        if (Position is >= 11 and <= 14 or >= 11 + 36 and <= 14 + 36) score -= 5; // entry to safe
+        return score;
+    }
 }
 
 class Player {
@@ -157,13 +220,13 @@ class Player {
         }
     }
 
-    public void Draw(Deck deck) => Hand.Add(deck.Draw());
-
-    public void Exchange(Deck deck, Card card) {
+    public void UseAndDraw(Deck deck, Card card) {
         Hand.Remove(card);
-        deck.Return(card);
-        Draw(deck);
+        card = deck.UseAndDraw(card);
+        Hand.Add(card);
     }
+
+    public int Score() => Marbles.Select(m => m.Score()).Sum();
 }
 
 class Board {
@@ -252,6 +315,11 @@ class Board {
 
     public void NextTurn() => Turn = (Turn + 1) % 4;
 
+    public List<Marble> AllMarbles() => Players.SelectMany(p => p.Marbles).ToList();
+    
+    public List<Marble> TeamMarbles() => Players[Turn].Marbles.Concat(Players[Teammate].Marbles).ToList();
+    
+    
     public string Play(string sCmd) {
         // examples
         // Kd e - means play King of Diamonds, move marble e out of home or ahead 13 steps if not in home
@@ -272,7 +340,7 @@ class Board {
         if (card == null) {
             return "Bad card " + ss[0];
         } else if (!splitMove && moves[0] == "x") { // discard
-            Players[Turn].Exchange(deck, card);
+            Players[Turn].UseAndDraw(deck, card);
             return null;
         } else if (!splitMove && card.MustSplit) {
             return "Must give 2 moves";
@@ -280,11 +348,9 @@ class Board {
             return "Must give 1 move";
         }
         // save current state
-        saveMarbles = Players
-            .Select((p, i) => p.Marbles.Select(m => new Marble(m.Letter, i) { Position = m.Position }).ToList())
-            .ToList();
-        var allMarbles = Players.SelectMany(p => p.Marbles).ToList();
-        var teamMarbles = Players[Turn].Marbles.Concat(Players[Teammate].Marbles).ToList();
+        saveMarbles = SaveState();
+        var allMarbles = AllMarbles(); 
+        var teamMarbles = TeamMarbles();
 
         try {
             int prevMove = 0;
@@ -374,7 +440,7 @@ class Board {
 
                 // chain of clicks
                 int pos = marble.AbsPosition;
-                var clicked = allMarbles.FirstOrDefault(m => m.AbsPosition == pos && m != marble);
+                var clicked = allMarbles.FirstOrDefault(m => m.AbsPosition == pos && m != marble && !m.IsSafe);
                 if (clicked != null) {
                     if (clicked.Player == marble.Player) {
                         return "Can't click same color";
@@ -383,7 +449,7 @@ class Board {
                     } else {
                         clicked.Position = 68; // send marble to safe entry
                         pos = clicked.AbsPosition;
-                        var clicked2 = allMarbles.FirstOrDefault(m => m.AbsPosition == pos && m != clicked);
+                        var clicked2 = allMarbles.FirstOrDefault(m => m.AbsPosition == pos && m != clicked && !m.IsSafe);
                         if (clicked2 != null) {
                             if (clicked2.Player == clicked.Player) {
                                 return "Can't click same color (2)";
@@ -392,7 +458,7 @@ class Board {
                             } else {
                                 clicked2.Position = 68; // send marble to safe entry
                                 var clicked3 = allMarbles.FirstOrDefault(m =>
-                                    m.AbsPosition == clicked2.AbsPosition && m != clicked2);
+                                    m.AbsPosition == clicked2.AbsPosition && m != clicked2 && !m.IsSafe);
                                 if (clicked3 != null) {
                                     clicked3.Position = 0; // send marble home - can only be hostile
                                 }
@@ -404,17 +470,11 @@ class Board {
                 prevMove = curMove;
                 prevMarble = marble;
             }
-            Players[Turn].Exchange(deck, card);
+            Players[Turn].UseAndDraw(deck, card);
             saveMarbles = null; // prevent rollback
         } finally {
             if (saveMarbles != null) {
-                for (int p = 0; p < Players.Count; p++) {
-                    var player = Players[p].Marbles;
-                    var savePlayer = saveMarbles[p];
-                    for (int i = 0; i < player.Count; i++) {
-                        player[i].Position = savePlayer[i].Position;
-                    }
-                }
+                RestoreState(saveMarbles);
             }
         }
         return null;
@@ -485,6 +545,113 @@ class Board {
             return false;
         }
     }
+
+    public int Score(int player) =>
+        Players[player].Score() + Players[(player + 2) % 4].Score() + HomeImbalance(player)
+        - Players[(player + 1) % 4].Score() - Players[(player + 3) % 4].Score();
+
+    public int HomeImbalance(int player) {
+        int c1 = Players[player].Marbles.Count(m => m.IsHome);
+        int c2 = Players[(player + 2) % 4].Marbles.Count(m => m.IsHome);
+        int c3 = Players[(player + 1) % 4].Marbles.Count(m => m.IsHome);
+        int c4 = Players[(player + 3) % 4].Marbles.Count(m => m.IsHome);
+        return -Math.Abs(c1 - c2) + Math.Abs(c3 - c4);
+    }
+
+    public int Score() => Score(Turn);
+    
+    public string Hand() => string.Join(',', Players[Turn].Hand);
+
+    public List<List<Marble>> SaveState() =>
+        Players.Select((p, i) => p.Marbles.Select(m => new Marble(m.Letter, i) { Position = m.Position }).ToList()).ToList();
+
+    public void RestoreState(List<List<Marble>> saveMarbles) {
+        for (int p = 0; p < Players.Count; p++) {
+            var player = Players[p].Marbles;
+            var savePlayer = saveMarbles[p];
+            for (int i = 0; i < player.Count; i++) {
+                player[i].Position = savePlayer[i].Position;
+            }
+        }
+    }
+
+    public IEnumerable<string> PossiblePlays() { // not including discard
+        foreach(var card in Players[Turn].Hand) {
+            if (card.CanSplit) {
+                if (card.Rank == Rank.Ten) {
+                    int mi1 = 0;
+                    foreach (var m1 in AllMarbles()) {
+                        foreach (var m2 in AllMarbles().Skip(++mi1)) {
+                            if (m1.Player == m2.Player) continue;
+                            for (int i = 1; i <= 9; i++) {
+                                yield return card + " " + m1.Letter + i + " " + m2.Letter + (10 - i);
+                                yield return card + " " + m1.Letter + -i + " " + m2.Letter + (10 - i);
+                                yield return card + " " + m1.Letter + i + " " + m2.Letter + -(10 - i);
+                                yield return card + " " + m1.Letter + -i + " " + m2.Letter + -(10 - i);
+                            }
+                        }
+                    }
+                } else {
+                    int mi1 = 0;
+                    foreach (var m1 in TeamMarbles()) {
+                        foreach (var m2 in TeamMarbles().Skip(++mi1)) {
+                            for (int i = 1; i < (int)card.Rank; i++) {
+                                string prefix = card + " " + m1.Letter + i + " " + m2.Letter;
+                                if (card.Rank == Rank.Seven) {
+                                    yield return prefix + (7 - i);
+                                } else {
+                                    yield return prefix + -(9 - i);
+                                    yield return prefix + -(9 - i);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            if (card.IsJoker) {
+                foreach (var m1 in AllMarbles()) {
+                    foreach (var m2 in AllMarbles()) {
+                        if (m1.Player == m2.Player) continue;
+                        yield return card + " " + m1.Letter + m2.Letter;
+                    }
+                }
+            }
+            if (!card.MustSplit && !card.IsJoker) {
+                foreach (var m in TeamMarbles()) {
+                    yield return card + " " + m.Letter;
+                }
+            }
+        }
+    }
+
+    public string AutoPlay() {
+        int maxScore = int.MinValue;
+        string maxPlay = null;
+        var saveState = SaveState();
+        var saveCards = new List<Card>(Players[Turn].Hand);
+        var saveDeck = deck.SaveCards();
+        int saveTurn = Turn;
+        foreach(var play in PossiblePlays().ToList()) {
+            string err = Play(play);
+            if (err == null) {
+                deck.RestoreCards(saveDeck);
+                int score = Score();
+                // subtract card worth to avoid using high value cards on low scoring moves
+                var card = new Card(play[..2]);
+                score -= card.Worth;
+                if (score > maxScore) {
+                    maxScore = score;
+                    maxPlay = play;
+                }
+                RestoreState(saveState);
+                Turn = saveTurn;
+                Players[Turn].Hand.Clear();
+                Players[Turn].Hand.AddRange(saveCards);
+            }
+        }
+        maxPlay ??= saveCards.OrderBy(c => c.Worth).First() + " x"; // discard
+        return maxPlay;
+    }
 }
 
 class Game {
@@ -498,19 +665,23 @@ class Game {
     }
 
     public void Run() {
-        while (true) {
+        for (;;) {
             Console.Clear();
             board.Paint();
-            Console.Write("Player " + board.Turn + " (" + string.Join(',', board.Players[board.Turn].Hand) + "):");
+            Console.Write("Player " + board.Turn + "[" + board.Score() + "] (" + board.Hand() + "):");
             string sCmd = Console.ReadLine() ?? "";
             if (sCmd == "exit") {
                 break;
+            } else if (sCmd == "") {
+                sCmd = board.AutoPlay();
+                board.Print("Auto" + board.Turn + ": " + sCmd);
             }
             string s = board.Play(sCmd);
             if (s != null) {
                 board.Print(s);
             } else {
                 if (board.Win) {
+                    board.Paint();
                     Console.WriteLine("Players " + board.Turn + " and " + board.Teammate + " win!");
                     break;
                 }
