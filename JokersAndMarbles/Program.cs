@@ -238,8 +238,8 @@ class Board {
 
     private readonly Deck deck;
 
-    //    3031323334353637383940414243444546
-    //29 o o o o o o o o o o o o o o o o o o o 47
+    //29  3031323334353637383940414243444546   47
+    //   o o o o o o o o o o o o o o o o o o o
     //28 x     o         o                   x 48
     //27 x     o         o                   x 49
     //26 x     o o o   o o o           x x x x 50
@@ -257,27 +257,27 @@ class Board {
     //14 x x x x           o o o   o o o-3   x 62
     //13 x                   o         o-4   x 63
     //12 x                   o         o-5   x 64
-    //11 x o o o o o o o o o o o o o o o o o o 65
-    //    10 9 8 7 6 5 4 3 2 172717069686766
+    //   x o o o o o o o o o o o o o o o o o o
+    //11  10 9 8 7 6 5 4 3 2 172717069686766   65
     private char[][] board = """
                              ...................
-                             .  j    t         .
-                             .  i    s         .
-                             .  hgf rqp     HIJ.
+                             .  j    p         .
+                             .  i    q         .
+                             .  hgf tsr     HIJ.
                              .              G  .
-                             .   0          F  .
-                             .   1             .
-                             .   2          R  .
-                             .   3          QST.
-                             .  K4          P  .
-                             .ONL5             .
-                             .  M6             .
-                             .   7             .
-                             .  A8             .
+                             .   $          F  .
+                             .   $             .
+                             .   $          T  .
+                             .   $          SQP.
+                             .  M$          R  .
+                             .KLN$             .
+                             .  O$             .
+                             .   $             .
+                             .  A$             .
                              .  B              .
-                             .EDC     klm abc  .
-                             .         n    d  .
-                             .         o    e  .
+                             .EDC     mno abc  .
+                             .         l    d  .
+                             .         k    e  .
                              ...................
                              """.Split('\n').Select(s => s.ToCharArray()).ToArray();
 
@@ -298,7 +298,7 @@ class Board {
         for (int r = 0; r < board.Length; r++) {
             var row = board[r];
             for (int c = 0; c < row.Length; c++) {
-                if (row[c] is >= 'A' and <= 'z') {
+                if (row[c] is >= 'A' and <='T' or >='a' and <='t') {
                     positionForChar[row[c]] = (y: r, x: c);
                 }
             }
@@ -522,13 +522,14 @@ class Board {
             }
         }
 
+        int il = 0;
         foreach (var line in board) {
             for (var j = 0; j < line.Length; j++) {
                 var c = line[j];
-                if (c is >= '0' and <= '9') {
+                if (c == '$') {
                     j += 9;
                     Console.Write(' ');
-                    Console.Write(info[c - '0'].PadRight(19)[..19]);
+                    Console.Write(info[il++].PadRight(19)[..19]);
                 } else {
                     Console.Write(c);
                     Console.Write(' ');
