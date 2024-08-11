@@ -4,8 +4,8 @@ class Program {
     static void Main(string[] args) => new Game(new Random(0)).Run();
 }
 
-enum Suit {
-    None = 0,
+enum Suit { // Suit doesn't actually matter in game play
+    None = 0, // only used for Joker
     Spades,
     Hearts,
     Clubs,
@@ -13,25 +13,44 @@ enum Suit {
 }
 
 enum Rank {
-    Joker = 0,
-    Ace,
-    Two,
-    Three,
-    Four,
-    Five,
-    Six,
-    Seven,
-    Eight,
-    Nine,
-    Ten,
-    Jack,
-    Queen,
-    King,
+    Joker = 0, // always Suit of None
+    Ace, // home->start or advance 1 step
+    Two, // advance 2 steps
+    Three, // advance 3 steps
+    Four, // advance 4 steps
+    Five, // advance 5 steps
+    Six, // advance 6 steps
+    Seven, // advance 7 steps or split 7 steps between two marbles
+    Eight, // go back 8 steps
+    Nine, // advance 9 steps or split 9 steps between two marbles, one forward, one backward
+    Ten, // split 10 steps between ANY two marbles of different colors in either direction
+    Jack, // home->start or advance 11 steps
+    Queen, // home->start or advance 12 steps
+    King, // home->start or advance 13 steps
+}
+
+static class ExtensionMethods {
+    public static int Worth(this Rank rank) =>
+        rank switch {
+            Rank.Joker => 21,
+            Rank.Ten => 20,
+            Rank.Nine => 15,
+            Rank.Eight => 12,
+            Rank.Seven => 11,
+            Rank.Ace => 10,
+            Rank.King => 7,
+            Rank.Queen => 6,
+            Rank.Jack => 5,
+            Rank.Two => 2,
+            Rank.Three => 1,
+            _ => 0
+        };
 }
 
 class Card {
     public Suit Suit { get; }
     public Rank Rank { get; }
+
     public bool IsAceOrFace => Rank is Rank.Ace or Rank.Jack or Rank.Queen or Rank.King;
     public bool IsJoker => Rank is Rank.Joker;
     public bool CanSplit => Rank is Rank.Seven or Rank.Nine or Rank.Ten;
@@ -43,50 +62,40 @@ class Card {
     }
 
     public Card(string str) {
-        if (str[0] == 'J' && str[1] == 'o') {
-            Suit = Suit.None;
-            Rank = Rank.Joker;
-        } else {
+        Suit = Suit.None;
+        Rank = Rank.Joker;
+        if (str[0] != 'J' || str[1] != 'o') {
             if (char.IsDigit(str[0])) {
                 Rank = (Rank)int.Parse(str[..1]);
             } else {
-                foreach (var r in Enum.GetValues(typeof(Rank))) {
-                    if (str[0] == r.ToString()[0]) {
-                        Rank = (Rank)r;
-                        break;
-                    }
-                }
+                Rank = str[0] switch {
+                    'A' => Rank.Ace,
+                    'K' => Rank.King,
+                    'Q' => Rank.Queen,
+                    'J' => Rank.Jack,
+                    'T' => Rank.Ten,
+                    _ => Rank.Joker // invalid card
+                };
             }
-            foreach (var s in Enum.GetValues(typeof(Suit))) {
-                if (str[1] == s.ToString()[0]) {
-                    Suit = (Suit)s;
-                    break;
-                }
+            Suit = str[1] switch {
+                's' => Suit.Spades,
+                'h' => Suit.Hearts,
+                'c' => Suit.Clubs,
+                'd' => Suit.Diamonds,
+                _ => Suit.None // invalid suit
+            };
+            if (Rank == Rank.Joker || Suit == Suit.None) {
+                throw new ArgumentException("Invalid card " + str);
             }
         }
     }
 
-    public override string ToString() => IsJoker
-        ? "Jo"
-        : (IsAceOrFace || Rank == Rank.Ten ? Rank.ToString()[..1] : ((int)Rank).ToString()) + "" +
-          char.ToLower(Suit.ToString()[0]);
+    public override string ToString() => !IsJoker
+        ? (IsAceOrFace || Rank == Rank.Ten ? Rank.ToString()[..1] : ((int)Rank).ToString())
+          + "" + char.ToLower(Suit.ToString()[0])
+        : "Jo";
 
     public int Value => Rank == Rank.Eight ? -8 : (int)Rank;
-
-    public int Worth => Rank switch {
-        Rank.Joker => 21,
-        Rank.Ten => 20,
-        Rank.Nine => 15,
-        Rank.Eight => 12,
-        Rank.Seven => 11,
-        Rank.Ace => 10,
-        Rank.King => 7,
-        Rank.Queen => 6,
-        Rank.Jack => 5,
-        Rank.Two => 2,
-        Rank.Three => 1,
-        _ => 0
-    };
 }
 
 class Deck {
@@ -115,16 +124,16 @@ class Deck {
         cards.RemoveAt(cards.Count - 1);
         return card;
     }
-    
+
     public Card UseAndDraw(Card card) {
         cards.Insert(0, card);
         card = cards[^1];
         cards.RemoveAt(cards.Count - 1);
         return card;
     }
-    
+
     public List<Card> SaveCards() => new(cards);
-    
+
     public void RestoreCards(List<Card> saveCards) {
         cards.Clear();
         cards.AddRange(saveCards);
@@ -141,9 +150,10 @@ class Deck {
 class Marble(char letter, int player) {
     public char Letter { get; } = letter;
     public int Player { get; } = player;
+    public int Position { get; set; } // 0=home, 1-72=relative board position, -1 to -5=safe
+
     public int Teammate => (Player + 2) % 4;
     public int Offset => Player * 18;
-    public int Position { get; set; } // 0=home, 1-72=relative board position, -1 to -5=safe
     public int AbsPosition => Position > 0 ? (Position + Offset - 1) % 72 + 1 : Position; // for non-home/safe marbles
     public bool IsHome => Position == 0;
     public bool IsSafe => Position < 0;
@@ -210,12 +220,12 @@ class Player {
     public List<Card> Hand { get; }
     public List<Marble> Marbles { get; } = new(5);
 
-    public Player(int player, Deck deck, string letters, int cards = 3) {
+    public Player(int player, Deck deck, string marbleLetters, int cards = 3) {
         Hand = new(cards);
         for (int card = 0; card < cards; card++) {
             Hand.Add(deck.Draw());
         }
-        foreach (char letter in letters) {
+        foreach (char letter in marbleLetters) {
             Marbles.Add(new Marble(letter, player));
         }
     }
@@ -232,10 +242,11 @@ class Player {
 class Board {
     public List<Player> Players { get; } = new(4);
     public int Turn { get; set; } = 0;
+
     public int Teammate => (Turn + 2) % 4;
     public bool Win => Players[Turn].Marbles.All(m => m.IsSafe) && Players[Teammate].Marbles.All(m => m.IsSafe);
-    public string[] info = new string[9];
 
+    private string[] info = new string[9];
     private readonly Deck deck;
 
     //29  3031323334353637383940414243444546   47
@@ -260,25 +271,25 @@ class Board {
     //   x o o o o o o o o o o o o o o o o o o
     //11  10 9 8 7 6 5 4 3 2 172717069686766   65
     private char[][] board = """
-                             ...................
+                             ..*.....*.....*....
                              .  j    p         .
-                             .  i    q         .
+                             .  i    q         *
                              .  hgf tsr     HIJ.
-                             .              G  .
+                             *              G  .
                              .   $          F  .
                              .   $             .
                              .   $          T  .
-                             .   $          SQP.
+                             .   $          SQP*
                              .  M$          R  .
-                             .KLN$             .
+                             *KLN$             .
                              .  O$             .
                              .   $             .
                              .  A$             .
-                             .  B              .
+                             .  B              *
                              .EDC     mno abc  .
-                             .         l    d  .
+                             *         l    d  .
                              .         k    e  .
-                             ...................
+                             ....*.....*.....*..
                              """.Split('\n').Select(s => s.ToCharArray()).ToArray();
 
     private Dictionary<char, (int y, int x)> positionForChar = new(5 * 2 * 4 + 9);
@@ -298,7 +309,7 @@ class Board {
         for (int r = 0; r < board.Length; r++) {
             var row = board[r];
             for (int c = 0; c < row.Length; c++) {
-                if (row[c] is >= 'A' and <='T' or >='a' and <='t') {
+                if (row[c] is >= 'A' and <= 'T' or >= 'a' and <= 't') {
                     positionForChar[row[c]] = (y: r, x: c);
                 }
             }
@@ -316,10 +327,10 @@ class Board {
     public void NextTurn() => Turn = (Turn + 1) % 4;
 
     public List<Marble> AllMarbles() => Players.SelectMany(p => p.Marbles).ToList();
-    
+
     public List<Marble> TeamMarbles() => Players[Turn].Marbles.Concat(Players[Teammate].Marbles).ToList();
-    
-    
+
+
     public string Play(string sCmd) {
         // examples
         // Kd e - means play King of Diamonds, move marble e out of home or ahead 13 steps if not in home
@@ -349,7 +360,7 @@ class Board {
         }
         // save current state
         saveMarbles = SaveState();
-        var allMarbles = AllMarbles(); 
+        var allMarbles = AllMarbles();
         var teamMarbles = TeamMarbles();
 
         try {
@@ -449,7 +460,8 @@ class Board {
                     } else {
                         clicked.Position = 68; // send marble to safe entry
                         pos = clicked.AbsPosition;
-                        var clicked2 = allMarbles.FirstOrDefault(m => m.AbsPosition == pos && m != clicked && !m.IsSafe);
+                        var clicked2 =
+                            allMarbles.FirstOrDefault(m => m.AbsPosition == pos && m != clicked && !m.IsSafe);
                         if (clicked2 != null) {
                             if (clicked2.Player == clicked.Player) {
                                 return "Can't click same color (2)";
@@ -560,11 +572,12 @@ class Board {
     }
 
     public int Score() => Score(Turn);
-    
+
     public string Hand() => string.Join(',', Players[Turn].Hand);
 
     public List<List<Marble>> SaveState() =>
-        Players.Select((p, i) => p.Marbles.Select(m => new Marble(m.Letter, i) { Position = m.Position }).ToList()).ToList();
+        Players.Select((p, i) => p.Marbles.Select(m => new Marble(m.Letter, i) { Position = m.Position }).ToList())
+            .ToList();
 
     public void RestoreState(List<List<Marble>> saveMarbles) {
         for (int p = 0; p < Players.Count; p++) {
@@ -577,12 +590,14 @@ class Board {
     }
 
     public IEnumerable<string> PossiblePlays() { // not including discard
-        foreach(var card in Players[Turn].Hand) {
+        var allMarbles = AllMarbles();
+        var teamMarbles = TeamMarbles();
+        foreach (var card in Players[Turn].Hand) {
             if (card.CanSplit) {
                 if (card.Rank == Rank.Ten) {
                     int mi1 = 0;
-                    foreach (var m1 in AllMarbles()) {
-                        foreach (var m2 in AllMarbles().Skip(++mi1)) {
+                    foreach (var m1 in allMarbles) {
+                        foreach (var m2 in allMarbles.Skip(++mi1)) {
                             if (m1.Player == m2.Player) continue;
                             for (int i = 1; i <= 9; i++) {
                                 yield return card + " " + m1.Letter + i + " " + m2.Letter + (10 - i);
@@ -594,8 +609,8 @@ class Board {
                     }
                 } else {
                     int mi1 = 0;
-                    foreach (var m1 in TeamMarbles()) {
-                        foreach (var m2 in TeamMarbles().Skip(++mi1)) {
+                    foreach (var m1 in teamMarbles) {
+                        foreach (var m2 in teamMarbles.Skip(++mi1)) {
                             for (int i = 1; i < (int)card.Rank; i++) {
                                 string prefix = card + " " + m1.Letter + i + " " + m2.Letter;
                                 if (card.Rank == Rank.Seven) {
@@ -610,15 +625,15 @@ class Board {
                 }
             }
             if (card.IsJoker) {
-                foreach (var m1 in AllMarbles()) {
-                    foreach (var m2 in AllMarbles()) {
-                        if (m1.Player == m2.Player) continue;
+                foreach (var m1 in allMarbles) {
+                    foreach (var m2 in allMarbles) {
+                        if (m1.Player != m2.Player) continue;
                         yield return card + " " + m1.Letter + m2.Letter;
                     }
                 }
             }
             if (!card.MustSplit && !card.IsJoker) {
-                foreach (var m in TeamMarbles()) {
+                foreach (var m in teamMarbles) {
                     yield return card + " " + m.Letter;
                 }
             }
@@ -632,14 +647,14 @@ class Board {
         var saveCards = new List<Card>(Players[Turn].Hand);
         var saveDeck = deck.SaveCards();
         int saveTurn = Turn;
-        foreach(var play in PossiblePlays().ToList()) {
+        foreach (var play in PossiblePlays().ToList()) {
             string err = Play(play);
             if (err == null) {
                 deck.RestoreCards(saveDeck);
                 int score = Score();
-                // subtract card worth to avoid using high value cards on low scoring moves
                 var card = new Card(play[..2]);
-                score -= card.Worth;
+                // subtract card worth to avoid using high value cards on low scoring moves
+                score -= card.Rank.Worth();
                 if (score > maxScore) {
                     maxScore = score;
                     maxPlay = play;
@@ -650,7 +665,7 @@ class Board {
                 Players[Turn].Hand.AddRange(saveCards);
             }
         }
-        maxPlay ??= saveCards.OrderBy(c => c.Worth).First() + " x"; // discard
+        maxPlay ??= saveCards.OrderBy(c => c.Rank.Worth()).First() + " x"; // discard
         return maxPlay;
     }
 }
