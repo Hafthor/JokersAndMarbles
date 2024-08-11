@@ -1,7 +1,7 @@
 ﻿namespace JokersAndMarbles;
 
 class Program {
-    static void Main(string[] args) => new Game(new Random(0)).Run();
+    static void Main(string[] args) => new Game(args.Length == 0 ? new Random() : new Random(int.Parse(args[0]))).Run();
 }
 
 enum Suit { // Suit doesn't actually matter in game play
@@ -32,16 +32,16 @@ enum Rank {
 static class ExtensionMethods {
     public static int Worth(this Rank rank) =>
         rank switch {
-            Rank.Joker => 21,
-            Rank.Ten => 20,
-            Rank.Nine => 15,
-            Rank.Eight => 12,
-            Rank.Seven => 11,
-            Rank.Ace => 10,
-            Rank.King => 7,
-            Rank.Queen => 6,
-            Rank.Jack => 5,
-            Rank.Two => 2,
+            Rank.Joker => 11,
+            Rank.Ten => 10,
+            Rank.Nine => 9,
+            Rank.Eight => 7,
+            Rank.Seven => 5,
+            Rank.Ace => 3,
+            Rank.King => 3,
+            Rank.Queen => 2,
+            Rank.Jack => 2,
+            Rank.Two => 1,
             Rank.Three => 1,
             _ => 0
         };
@@ -51,7 +51,7 @@ class Card {
     public Suit Suit { get; }
     public Rank Rank { get; }
 
-    public bool IsAceOrFace => Rank is Rank.Ace or Rank.Jack or Rank.Queen or Rank.King;
+    public bool IsAceOrFace => Rank is Rank.Ace or >= Rank.Jack;
     public bool IsJoker => Rank is Rank.Joker;
     public bool CanSplit => Rank is Rank.Seven or Rank.Nine or Rank.Ten;
     public bool MustSplit => Rank is Rank.Ten;
@@ -66,24 +66,22 @@ class Card {
         Rank = Rank.Joker;
         if (str[0] != 'J' || str[1] != 'o') {
             if (char.IsDigit(str[0])) {
-                Rank = (Rank)int.Parse(str[..1]);
+                Rank = (Rank)(str[1] - '0');
             } else {
-                Rank = str[0] switch {
-                    'A' => Rank.Ace,
-                    'K' => Rank.King,
-                    'Q' => Rank.Queen,
-                    'J' => Rank.Jack,
-                    'T' => Rank.Ten,
-                    _ => Rank.Joker // invalid card
-                };
+                foreach (var v in Enum.GetValues<Rank>()) {
+                    if (v != Rank.Joker && v.ToString()[0] == str[0]) {
+                        Rank = v;
+                        break;
+                    }
+                }
             }
-            Suit = str[1] switch {
-                's' => Suit.Spades,
-                'h' => Suit.Hearts,
-                'c' => Suit.Clubs,
-                'd' => Suit.Diamonds,
-                _ => Suit.None // invalid suit
-            };
+            char f = char.ToUpper(str[1]);
+            foreach(var v in Enum.GetValues<Suit>()) {
+                if (v != Suit.None && v.ToString()[0] == f) {
+                    Suit = v;
+                    break;
+                }
+            }
             if (Rank == Rank.Joker || Suit == Suit.None) {
                 throw new ArgumentException("Invalid card " + str);
             }
@@ -359,7 +357,7 @@ class Board {
             return "Must give 1 move";
         }
         // save current state
-        saveMarbles = SaveState();
+        saveMarbles = SaveMarbles();
         var allMarbles = AllMarbles();
         var teamMarbles = TeamMarbles();
 
@@ -486,7 +484,7 @@ class Board {
             saveMarbles = null; // prevent rollback
         } finally {
             if (saveMarbles != null) {
-                RestoreState(saveMarbles);
+                RestoreMarbles(saveMarbles);
             }
         }
         return null;
@@ -575,11 +573,11 @@ class Board {
 
     public string Hand() => string.Join(',', Players[Turn].Hand);
 
-    public List<List<Marble>> SaveState() =>
+    public List<List<Marble>> SaveMarbles() =>
         Players.Select((p, i) => p.Marbles.Select(m => new Marble(m.Letter, i) { Position = m.Position }).ToList())
             .ToList();
 
-    public void RestoreState(List<List<Marble>> saveMarbles) {
+    public void RestoreMarbles(List<List<Marble>> saveMarbles) {
         for (int p = 0; p < Players.Count; p++) {
             var player = Players[p].Marbles;
             var savePlayer = saveMarbles[p];
@@ -643,7 +641,7 @@ class Board {
     public string AutoPlay() {
         int maxScore = int.MinValue;
         string maxPlay = null;
-        var saveState = SaveState();
+        var saveState = SaveMarbles();
         var saveCards = new List<Card>(Players[Turn].Hand);
         var saveDeck = deck.SaveCards();
         int saveTurn = Turn;
@@ -659,7 +657,7 @@ class Board {
                     maxScore = score;
                     maxPlay = play;
                 }
-                RestoreState(saveState);
+                RestoreMarbles(saveState);
                 Turn = saveTurn;
                 Players[Turn].Hand.Clear();
                 Players[Turn].Hand.AddRange(saveCards);
