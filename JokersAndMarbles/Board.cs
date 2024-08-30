@@ -57,15 +57,15 @@ public class Board {
 
     public Board(Deck deck) {
         this.deck = deck;
-        var letters = new[] { "ABCDE", "abcde", "FGHIJ", "fghij" };
-        for (var p = 0; p < letters.Length; p++) {
-            Players.Add(new Player(p, deck, letters[p]));
+        var marbleLetters = new[] { "ABCDE", "abcde", "FGHIJ", "fghij" };
+        for (var p = 0; p < marbleLetters.Length; p++) {
+            Players.Add(new Player(p, deck, marbleLetters[p]));
         }
         for (int i = 0; i < 8; i++) {
             info[i] = "";
         }
-        //         1234567890123456789
-        info[8] = "Jokers and Marbles";
+        //     1234567890123456789
+        Print("Jokers and Marbles");
 
         for (int r = 0; r < board.Length; r++) {
             var row = board[r];
@@ -103,21 +103,21 @@ public class Board {
         // 6s x - means discard Six of Spades, draw new card
         string[] ss = sCmd.Split(' ');
         if (ss.Length < 2 || ss.Length > 3) {
-            return "Bad command " + sCmd;
+            return $"Bad command {sCmd}";
         }
         string[] moves = ss[1..];
         bool splitMove = moves.Length > 1;
         Card card = Players[Turn].Hand.FirstOrDefault(c => c.ToString() == ss[0], default);
         List<List<Marble>> saveMarbles = null;
         if (card == null) {
-            return "Bad card " + ss[0];
+            return $"Bad card {ss[0]}";
         } else if (!splitMove && moves[0] == "x") { // discard
             Players[Turn].UseAndDraw(deck, card);
             return null;
         } else if (!splitMove && card.MustSplit) {
-            return "Must give 2 moves";
+            return "Requires 2 moves";
         } else if (splitMove && !card.CanSplit) {
-            return "Must give 1 move";
+            return "Only 1 move";
         }
         // save current state
         saveMarbles = SaveMarbles();
@@ -133,12 +133,12 @@ public class Board {
                 List<Marble> marbles = card.Rank == Rank.Ten ? allMarbles : teamMarbles;
                 Marble marble = marbles.FirstOrDefault(m => m.Letter == move[0], default);
                 if (marble == null) {
-                    return "Bad marble " + move[0];
+                    return $"Bad marble ${move[0]}";
                 }
                 bool hostile = card.Rank == Rank.Ten && teamMarbles.All(m => m.Letter != move[0]);
                 if (move.Length == 1) { // infer move
                     if (card.Rank is Rank.Ten || card.Rank is Rank.Seven or Rank.Nine && splitMove && moveIndex == 0) {
-                        return "Give distances for " + card.Rank;
+                        return $"Give distances for {card.Rank}";
                     } else {
                         curMove = card.Value;
                         if (marble.IsHome) {
@@ -147,7 +147,7 @@ public class Board {
                             } else if (card.IsJoker) {
                                 curMove = 18 * 2 + 1; // opposite start
                             } else {
-                                return "Can't exit home w/ " + card.Rank;
+                                return $"Can't exit home w/ {card.Rank}";
                             }
                         }
                     }
@@ -169,7 +169,7 @@ public class Board {
                         curMove = (72 + click.AbsPosition - marble.AbsPosition - 1) % 72 + 1;
                     } else {
                         if (!int.TryParse(move[1..], out curMove) || curMove == 0) {
-                            return "Bad move " + move;
+                            return $"Bad move ${move}";
                         } else if (marble.IsHome && (curMove != 1 || !card.IsAceOrFace) && !card.IsJoker) {
                             return "Can't move marble out of home";
                         } else if (marble.IsSafe) {
@@ -189,7 +189,7 @@ public class Board {
                 } else if (marble.IsHome && curMove != 1 && !card.IsJoker) {
                     return "Can't move marble out of home";
                 } else if (!marble.IsHome && curMove != card.Value && !card.CanSplit && !card.IsJoker) {
-                    return "Bad move " + move + " w/ " + card;
+                    return $"Bad move {move} w/ {card}";
                 }
 
                 if (moveIndex > 0) {
@@ -355,16 +355,16 @@ public class Board {
         var teamMarbles = TeamMarbles();
         foreach (var card in Players[Turn].Hand) {
             if (card.CanSplit) {
-                if (card.Rank == Rank.Ten) {
+                if (card.Rank == Rank.Ten) { // must split
                     int mi1 = 0;
                     foreach (var m1 in allMarbles) {
                         foreach (var m2 in allMarbles.Skip(++mi1)) {
                             if (m1.Player == m2.Player) continue;
                             for (int i = 1; i <= 9; i++) {
-                                yield return card + " " + m1.Letter + i + " " + m2.Letter + (10 - i);
-                                yield return card + " " + m1.Letter + -i + " " + m2.Letter + (10 - i);
-                                yield return card + " " + m1.Letter + i + " " + m2.Letter + -(10 - i);
-                                yield return card + " " + m1.Letter + -i + " " + m2.Letter + -(10 - i);
+                                yield return $"{card} {m1.Letter}{i} {m2.Letter}{10 - i}";
+                                yield return $"{card} {m1.Letter}{-i} {m2.Letter}{10 - i}";
+                                yield return $"{card} {m1.Letter}{i} {m2.Letter}{-(10 - i)}";
+                                yield return $"{card} {m1.Letter}{-i} {m2.Letter}{-(10 - i)}";
                             }
                         }
                     }
@@ -373,12 +373,11 @@ public class Board {
                     foreach (var m1 in teamMarbles) {
                         foreach (var m2 in teamMarbles.Skip(++mi1)) {
                             for (int i = 1; i < (int)card.Rank; i++) {
-                                string prefix = card + " " + m1.Letter + i + " " + m2.Letter;
+                                string prefix = $"{card} {m1.Letter}{i} {m2.Letter}";
                                 if (card.Rank == Rank.Seven) {
-                                    yield return prefix + (7 - i);
+                                    yield return $"{prefix}{7 - i}";
                                 } else {
-                                    yield return prefix + -(9 - i);
-                                    yield return prefix + -(9 - i);
+                                    yield return $"{prefix}{-(9 - i)}";
                                 }
                             }
                         }
@@ -389,13 +388,13 @@ public class Board {
                 foreach (var m1 in allMarbles) {
                     foreach (var m2 in allMarbles) {
                         if (m1.Player != m2.Player) continue;
-                        yield return card + " " + m1.Letter + m2.Letter;
+                        yield return $"{card} {m1.Letter}{m2.Letter}";
                     }
                 }
             }
             if (!card.MustSplit && !card.IsJoker) {
                 foreach (var m in teamMarbles) {
-                    yield return card + " " + m.Letter;
+                    yield return $"{card} {m.Letter}";
                 }
             }
         }
@@ -426,7 +425,7 @@ public class Board {
                 Players[Turn].Hand.AddRange(saveCards);
             }
         }
-        maxPlay ??= saveCards.OrderBy(c => c.Rank.Worth()).First() + " x"; // discard
+        maxPlay ??= $"{saveCards.OrderBy(c => c.Rank.Worth()).First()} x"; // discard
         return maxPlay;
     }
 }

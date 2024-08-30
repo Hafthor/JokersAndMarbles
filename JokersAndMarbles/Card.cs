@@ -29,21 +29,20 @@ public class Card {
                 }
             }
             char f = char.ToUpper(str[1]);
-            foreach(var v in Enum.GetValues<Suit>()) {
+            foreach (var v in Enum.GetValues<Suit>()) {
                 if (v != Suit.None && v.ToString()[0] == f) {
                     Suit = v;
                     break;
                 }
             }
             if (Rank == Rank.Joker || Suit == Suit.None) {
-                throw new ArgumentException("Invalid card " + str);
+                throw new ArgumentException($"Invalid card {str}");
             }
         }
     }
 
     public override string ToString() => !IsJoker
-        ? (IsAceOrFace || Rank == Rank.Ten ? Rank.ToString()[..1] : ((int)Rank).ToString())
-          + "" + char.ToLower(Suit.ToString()[0])
+        ? $"{(IsAceOrFace || Rank == Rank.Ten ? Rank.ToString()[..1] : ((int)Rank).ToString())}{char.ToLower(Suit.ToString()[0])}"
         : "Jo";
 
     public int Value => Rank == Rank.Eight ? -8 : (int)Rank;
