@@ -1,8 +1,8 @@
 namespace JokersAndMarbles;
 
 public class Game {
-    private Board board;
-    private Deck deck;
+    private readonly Board board;
+    private readonly Deck deck;
 
     public Game(Random rnd) {
         deck = new Deck();

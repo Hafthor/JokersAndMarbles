@@ -1,10 +1,9 @@
 namespace JokersAndMarbles;
 
 public class Marble(char letter, int player) {
+    public int Position { get; set; } // 0=home, 1-72=relative board position, -1 to -5=safe
     public char Letter { get; } = letter;
     public int Player { get; } = player;
-    public int Position { get; set; } // 0=home, 1-72=relative board position, -1 to -5=safe
-
     public int Teammate => (Player + 2) % 4;
     public int Offset => Player * 18;
     public int AbsPosition => Position > 0 ? (Position + Offset - 1) % 72 + 1 : Position; // for non-home/safe marbles

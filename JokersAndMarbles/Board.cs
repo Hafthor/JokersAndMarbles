@@ -1,15 +1,8 @@
+using System.Collections.Immutable;
+
 namespace JokersAndMarbles;
 
 public class Board {
-    public List<Player> Players { get; } = new(4);
-    public int Turn { get; set; } = 0;
-
-    public int Teammate => (Turn + 2) % 4;
-    public bool Win => Players[Turn].Marbles.All(m => m.IsSafe) && Players[Teammate].Marbles.All(m => m.IsSafe);
-
-    private string[] info = new string[9];
-    private readonly Deck deck;
-
     //29  3031323334353637383940414243444546   47
     //   o o o o o o o o o o o o o o o o o o o
     //28 x     o         o                   x 48
@@ -31,29 +24,37 @@ public class Board {
     //12 x                   o         o-5   x 64
     //   x o o o o o o o o o o o o o o o o o o
     //11  10 9 8 7 6 5 4 3 2 172717069686766   65
-    private char[][] board = """
-                             ..*.....*.....*....
-                             .  j    p         .
-                             .  i    q         *
-                             .  hgf tsr     HIJ.
-                             *              G  .
-                             .   $          F  .
-                             .   $             .
-                             .   $          T  .
-                             .   $          SQP*
-                             .  M$          R  .
-                             *KLN$             .
-                             .  O$             .
-                             .   $             .
-                             .  A$             .
-                             .  B              *
-                             .EDC     mno abc  .
-                             *         l    d  .
-                             .         k    e  .
-                             ....*.....*.....*..
-                             """.Split('\n').Select(s => s.ToCharArray()).ToArray();
+    private static readonly ImmutableArray<ImmutableArray<char>> board = """
+                                                                         ..*.....*.....*....
+                                                                         .  j    p         .
+                                                                         .  i    q         *
+                                                                         .  hgf tsr     HIJ.
+                                                                         *              G  .
+                                                                         .   $          F  .
+                                                                         .   $             .
+                                                                         .   $          T  .
+                                                                         .   $          SQP*
+                                                                         .  M$          R  .
+                                                                         *KLN$             .
+                                                                         .  O$             .
+                                                                         .   $             .
+                                                                         .  A$             .
+                                                                         .  B              *
+                                                                         .EDC     mno abc  .
+                                                                         *         l    d  .
+                                                                         .         k    e  .
+                                                                         ....*.....*.....*..
+                                                                         """
+        .Split('\n').Select(s => s.ToCharArray().ToImmutableArray()).ToImmutableArray();
 
-    private Dictionary<char, (int y, int x)> positionForChar = new(5 * 2 * 4 + 9);
+    private readonly string[] info = new string[9];
+    private readonly Deck deck;
+    private readonly Dictionary<char, (int y, int x)> positionForChar = new(5 * 2 * 4 + 9);
+    
+    public int Turn { get; set; } = 0;
+    public int Teammate => (Turn + 2) % 4;
+    public List<Player> Players { get; } = new(4);
+    public bool Win => Players[Turn].Marbles.All(m => m.IsSafe) && Players[Teammate].Marbles.All(m => m.IsSafe);
 
     public Board(Deck deck) {
         this.deck = deck;
@@ -259,7 +260,7 @@ public class Board {
         }
         string[] safes = ["abcde", "ABCDE", "fghij", "FGHIJ"];
         string[] homes = ["klmno", "KLMNO", "pqrst", "PQRST"];
-        var board = this.board.Select(row => row.ToArray()).ToArray();
+        var board = Board.board.Select(row => row.ToArray()).ToArray();
         foreach (var e in positionForChar) {
             var (y, x) = e.Value;
             board[y][x] = '.';
