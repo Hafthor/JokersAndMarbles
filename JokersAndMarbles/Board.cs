@@ -91,7 +91,7 @@ public class Board {
     public List<Marble> TeamMarbles() => players[Turn].Marbles.Concat(players[Teammate].Marbles).ToList();
 
 
-    public string Play(string sCmd) {
+    public string Play(string sCmd, bool quiet = false) {
         // examples
         // Kd e - means play King of Diamonds, move marble e out of home or ahead 13 steps if not in home
         // Kd e13 - means play King of Diamonds, move marble e 13 steps forward
@@ -108,15 +108,19 @@ public class Board {
         Card card = players[Turn].Hand.FirstOrDefault(c => c.ToString() == ss[0], default);
         if (card == null) return $"Bad card {ss[0]}";
         if (!splitMove && moves[0] == "x") { // discard
-            players[Turn].UseAndDraw(deck, card);
+            Card newCard = players[Turn].UseAndDraw(deck, card);
+            if (!quiet) Print($"Discard {card}, draw {newCard}");
             return null;
         }
         if (!splitMove && card.MustSplit) return "Requires 2 moves";
         if (splitMove && !card.CanSplit) return "Only 1 move";
-        List<Marble> allMarbles = AllMarbles(), teamMarbles = TeamMarbles(), marbles = card.Rank == Rank.Ten ? allMarbles : teamMarbles;
+        List<Marble> allMarbles = AllMarbles(),
+            teamMarbles = TeamMarbles(),
+            marbles = card.Rank == Rank.Ten ? allMarbles : teamMarbles;
 
         // save current state
         List<List<Marble>> saveMarbles = SaveMarbles();
+        List<string> messages = new();
         try {
             int prevMove = 0;
             Marble prevMarble = null;
@@ -128,7 +132,7 @@ public class Board {
                 if (move.Length == 1) { // infer move
                     if (card.Rank is Rank.Ten || card.Rank is Rank.Seven or Rank.Nine && splitMove && moveIndex == 0)
                         return $"Give distances for {card.Rank}";
-                    
+
                     curMove = card.Value;
                     if (marble.IsHome)
                         if (card.IsAceOrFace)
@@ -150,7 +154,8 @@ public class Board {
                         curMove = (Marble.MAX + click.AbsPosition - marble.AbsPosition) % Marble.MAX;
                     } else {
                         if (!int.TryParse(move[1..], out curMove) || curMove == 0) return $"Bad move {move}";
-                        if (marble.IsHome && (curMove != Marble.START - Marble.HOME || !card.IsAceOrFace) && !card.IsJoker)
+                        if (marble.IsHome && (curMove != Marble.START - Marble.HOME || !card.IsAceOrFace) &&
+                            !card.IsJoker)
                             return "Can't move marble out of home";
                         if (marble.IsSafe)
                             if (Turn != marble.Player && Teammate != marble.Player)
@@ -163,18 +168,23 @@ public class Board {
                 }
 
                 if (marble.InLimbo && card.Rank != Rank.Ten && curMove >= 0) return "Marble in limbo";
-                if (marble.IsHome && curMove != Marble.START - Marble.HOME && !card.IsJoker) return "Can't move marble out of home";
-                if (!marble.IsHome && curMove != card.Value && !card.CanSplit && !card.IsJoker) return $"Bad move {move} w/ {card}";
+                if (marble.IsHome && curMove != Marble.START - Marble.HOME && !card.IsJoker)
+                    return "Can't move marble out of home";
+                if (!marble.IsHome && curMove != card.Value && !card.CanSplit && !card.IsJoker)
+                    return $"Bad move {move} w/ {card}";
 
                 if (moveIndex > 0) {
                     bool isCorrectValue = Math.Abs(prevMove) + Math.Abs(curMove) == card.Value;
                     if (card.Rank == Rank.Ten && !isCorrectValue) return "Must be 10 steps";
                     if (card.Rank == Rank.Ten && prevMarble.Player == marble.Player) return "Must be 2 colors";
-                    if (card.Rank == Rank.Seven && (curMove < 0 || prevMove < 0 || !isCorrectValue)) return "Must be 7 steps";
-                    if (card.Rank == Rank.Nine && (curMove < 0 == prevMove < 0 || !isCorrectValue)) return "Must be 9 steps +/-";
+                    if (card.Rank == Rank.Seven && (curMove < 0 || prevMove < 0 || !isCorrectValue))
+                        return "Must be 7 steps";
+                    if (card.Rank == Rank.Nine && (curMove < 0 == prevMove < 0 || !isCorrectValue))
+                        return "Must be 9 steps +/-";
                 }
 
-                string s = marble.Move(curMove, hostile, marble.IsHome || card.IsJoker ? null : players[marble.Player].Marbles);
+                string s = marble.Move(curMove, hostile,
+                    marble.IsHome || card.IsJoker ? null : players[marble.Player].Marbles);
                 if (s != null) return s;
 
                 // chain of clicks
@@ -182,23 +192,29 @@ public class Board {
                 var clicked = allMarbles.FirstOrDefault(m => m.AbsPosition == pos && m != marble && !m.IsSafe);
                 if (clicked != null) {
                     if (clicked.Player == marble.Player) return "Can't click same color";
-                    if (clicked.Player != marble.Teammate(players.Length))
+                    if (clicked.Player != marble.Teammate(players.Length)) {
                         clicked.Position = Marble.HOME; // send marble home
-                    else {
+                        messages.Add($"Clicked {clicked.Letter}, sent home");
+                    } else {
                         clicked.Position = Marble.ENTRY; // send marble to safe entry
+                        messages.Add($"Clicked {clicked.Letter}, sent to entry");
                         pos = clicked.AbsPosition;
                         var clicked2 =
                             allMarbles.FirstOrDefault(m => m.AbsPosition == pos && m != clicked && !m.IsSafe);
                         if (clicked2 != null) {
                             if (clicked2.Player == clicked.Player) return "Can't click same color (2)";
-                            if (clicked2.Player != clicked.Teammate(players.Length))
+                            if (clicked2.Player != clicked.Teammate(players.Length)) {
                                 clicked2.Position = Marble.HOME; // send marble home
-                            else {
+                                messages.Add($"Clicked {clicked2.Letter}, sent home");
+                            } else {
                                 clicked2.Position = Marble.ENTRY; // send marble to safe entry
+                                messages.Add($"Clicked {clicked2.Letter}, sent to entry");
                                 var clicked3 = allMarbles.FirstOrDefault(m =>
                                     m.AbsPosition == clicked2.AbsPosition && m != clicked2 && !m.IsSafe);
-                                if (clicked3 != null)
+                                if (clicked3 != null) {
                                     clicked3.Position = Marble.HOME; // send marble home - can only be hostile
+                                    messages.Add($"Clicked {clicked3.Letter}, sent home");
+                                }
                             }
                         }
                     }
@@ -207,10 +223,15 @@ public class Board {
                 prevMove = curMove;
                 prevMarble = marble;
             }
-            players[Turn].UseAndDraw(deck, card);
+            Card newCard = players[Turn].UseAndDraw(deck, card);
+            messages.Add($"Discard {card}, draw {newCard}");
             saveMarbles = null; // prevent rollback
         } finally {
-            if (saveMarbles != null) RestoreMarbles(saveMarbles);
+            if (saveMarbles != null)
+                RestoreMarbles(saveMarbles);
+            else if (!quiet)
+                foreach (var m in messages)
+                    Print(m);
         }
         return null;
     }
@@ -332,7 +353,7 @@ public class Board {
         int maxScore = int.MinValue, saveTurn = Turn;
         string maxPlay = null;
         foreach (string play in PossiblePlays()) {
-            string err = Play(play);
+            string err = Play(play, true);
             if (err == null) {
                 Card card = new(play[..2]);
                 // subtract card worth to avoid using high value cards on low scoring moves

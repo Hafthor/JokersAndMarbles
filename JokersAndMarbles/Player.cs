@@ -12,10 +12,11 @@ public class Player {
             Marbles.Add(new Marble(letter, player));
     }
 
-    public void UseAndDraw(Deck deck, Card card) {
+    public Card UseAndDraw(Deck deck, Card card) {
         Hand.Remove(card);
         card = deck.UseAndDraw(card);
         Hand.Add(card);
+        return card;
     }
 
     public int Score() => Marbles.Select(m => m.Score()).Sum();
