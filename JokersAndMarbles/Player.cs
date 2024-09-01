@@ -6,12 +6,10 @@ public class Player {
 
     public Player(int player, Deck deck, string marbleLetters, int cards = 3) {
         Hand = new(cards);
-        for (int card = 0; card < cards; card++) {
+        for (int card = 0; card < cards; card++)
             Hand.Add(deck.Draw());
-        }
-        foreach (char letter in marbleLetters) {
+        foreach (char letter in marbleLetters)
             Marbles.Add(new Marble(letter, player));
-        }
     }
 
     public void UseAndDraw(Deck deck, Card card) {

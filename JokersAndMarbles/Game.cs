@@ -4,11 +4,7 @@ public class Game {
     private readonly Board board;
     private readonly Deck deck;
 
-    public Game(Random rnd) {
-        deck = new Deck();
-        deck.Shuffle(rnd);
-        board = new Board(deck);
-    }
+    public Game(Random rnd) => board = new Board(new Deck().Shuffle(rnd));
 
     public void Run() {
         for (;;) {
@@ -16,9 +12,8 @@ public class Game {
             board.Paint();
             Console.Write($"Player {board.Turn}[{board.Score()}] ({board.Hand()}):");
             string sCmd = Console.ReadLine() ?? "";
-            if (sCmd == "exit") {
-                break;
-            } else if (sCmd == "") {
+            if (sCmd == "exit") break;
+            if (sCmd == "") {
                 sCmd = board.AutoPlay();
                 board.Print($"Auto{board.Turn}: {sCmd}");
             }

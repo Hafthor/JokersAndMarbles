@@ -3,34 +3,34 @@ using System.Collections.Immutable;
 namespace JokersAndMarbles;
 
 public class Board {
-    //29  3031323334353637383940414243444546   47
+    //28  2930313233343536373839404142434445   46
     //   o o o o o o o o o o o o o o o o o o o
-    //28 x     o         o                   x 48
-    //27 x     o         o                   x 49
-    //26 x     o o o   o o o           x x x x 50
-    //25 x                             x     x 51
-    //24 x                             x     x 52
-    //23 x                                   x 53
-    //22 x                             x     x 54
-    //21 x                             x x x x 55
-    //20 x     x                       x     x 56
-    //19 x x x x                             x 57
-    //18 x     x                             x 58
-    //17 x                                   x 59
-    //16 x     x                             x 60
-    //15 x     x          home 0  -1-2 safe  x 61
-    //14 x x x x           o o o   o o o-3   x 62
-    //13 x                   o         o-4   x 63
-    //12 x                   o         o-5   x 64
+    //27 x     o         o                   x 47
+    //26 x     o         o                   x 48
+    //25 x     o o o   o o o           x x x x 49
+    //24 x                             x     x 50
+    //23 x                             x     x 51
+    //22 x                                   x 52
+    //21 x                             x     x 53
+    //20 x                             x x x x 54
+    //19 x     x                       x     x 55
+    //18 x x x x                             x 56
+    //17 x     x                             x 57
+    //16 x                                   x 58
+    //15 x     x                             x 59
+    //14 x     x          home -5 7271 safe  x 60
+    //13 x x x x           o o o   o o o70   x 61
+    //12 x                   o         o69   x 62
+    //11 x                   o         o68   x 63
     //   x o o o o o o o o o o o o o o o o o o
-    //11  10 9 8 7 6 5 4 3 2 172717069686766   65
+    //10   9 8 7 6 5 4 3 2 1 0-1-2-3-4676665   64
     private static readonly ImmutableArray<ImmutableArray<char>> board = """
                                                                          ..*.....*.....*....
-                                                                         .  j    p         .
-                                                                         .  i    q         *
-                                                                         .  hgf tsr     HIJ.
-                                                                         *              G  .
-                                                                         .   $          F  .
+                                                                         .  f    p         .
+                                                                         .  g    q         *
+                                                                         .  hij tsr     HGF.
+                                                                         *              I  .
+                                                                         .   $          J  .
                                                                          .   $             .
                                                                          .   $          T  .
                                                                          .   $          SQP*
@@ -38,11 +38,11 @@ public class Board {
                                                                          *KLN$             .
                                                                          .  O$             .
                                                                          .   $             .
-                                                                         .  A$             .
-                                                                         .  B              *
-                                                                         .EDC     mno abc  .
-                                                                         *         l    d  .
-                                                                         .         k    e  .
+                                                                         .  E$             .
+                                                                         .  D              *
+                                                                         .ABC     mno edc  .
+                                                                         *         l    b  .
+                                                                         .         k    a  .
                                                                          ....*.....*.....*..
                                                                          """
         .Split('\n').Select(s => s.ToCharArray().ToImmutableArray()).ToImmutableArray();
@@ -51,30 +51,26 @@ public class Board {
     private readonly Deck deck;
     private readonly Dictionary<char, (int y, int x)> positionForChar = new(5 * 2 * 4 + 9);
     
-    public int Turn { get; set; } = 0;
-    public int Teammate => (Turn + 2) % 4;
+    public int Turn { get; private set; }
+    public int Teammate => (Turn + Players.Count / 2) % Players.Count;
     public List<Player> Players { get; } = new(4);
     public bool Win => Players[Turn].Marbles.All(m => m.IsSafe) && Players[Teammate].Marbles.All(m => m.IsSafe);
 
     public Board(Deck deck) {
         this.deck = deck;
         var marbleLetters = new[] { "ABCDE", "abcde", "FGHIJ", "fghij" };
-        for (var p = 0; p < marbleLetters.Length; p++) {
+        for (var p = 0; p < marbleLetters.Length; p++)
             Players.Add(new Player(p, deck, marbleLetters[p]));
-        }
-        for (int i = 0; i < 8; i++) {
+        for (int i = 0; i < 8; i++)
             info[i] = "";
-        }
         //     1234567890123456789
         Print("Jokers and Marbles");
 
         for (int r = 0; r < board.Length; r++) {
             var row = board[r];
-            for (int c = 0; c < row.Length; c++) {
-                if (row[c] is >= 'A' and <= 'T' or >= 'a' and <= 't') {
+            for (int c = 0; c < row.Length; c++)
+                if (row[c] is >= 'A' and <= 'T' or >= 'a' and <= 't')
                     positionForChar[row[c]] = (y: r, x: c);
-                }
-            }
         }
     }
 
@@ -86,7 +82,7 @@ public class Board {
         }
     }
 
-    public void NextTurn() => Turn = (Turn + 1) % 4;
+    public void NextTurn() => Turn = (Turn + 1) % Players.Count;
 
     public List<Marble> AllMarbles() => Players.SelectMany(p => p.Marbles).ToList();
 
@@ -103,139 +99,104 @@ public class Board {
         // Jo aB - means play Joker, move marble a and click marble B
         // 6s x - means discard Six of Spades, draw new card
         string[] ss = sCmd.Split(' ');
-        if (ss.Length < 2 || ss.Length > 3) {
+        if (ss.Length < 2 || ss.Length > 3)
             return $"Bad command {sCmd}";
-        }
         string[] moves = ss[1..];
         bool splitMove = moves.Length > 1;
         Card card = Players[Turn].Hand.FirstOrDefault(c => c.ToString() == ss[0], default);
-        List<List<Marble>> saveMarbles = null;
-        if (card == null) {
-            return $"Bad card {ss[0]}";
-        } else if (!splitMove && moves[0] == "x") { // discard
+        if (card == null) return $"Bad card {ss[0]}";
+        if (!splitMove && moves[0] == "x") { // discard
             Players[Turn].UseAndDraw(deck, card);
             return null;
-        } else if (!splitMove && card.MustSplit) {
-            return "Requires 2 moves";
-        } else if (splitMove && !card.CanSplit) {
-            return "Only 1 move";
         }
-        // save current state
-        saveMarbles = SaveMarbles();
-        var allMarbles = AllMarbles();
-        var teamMarbles = TeamMarbles();
+        if (!splitMove && card.MustSplit) return "Requires 2 moves";
+        if (splitMove && !card.CanSplit) return "Only 1 move";
+        List<Marble> allMarbles = AllMarbles(), teamMarbles = TeamMarbles(), marbles = card.Rank == Rank.Ten ? allMarbles : teamMarbles;
 
+        // save current state
+        List<List<Marble>> saveMarbles = SaveMarbles();
         try {
             int prevMove = 0;
             Marble prevMarble = null;
-            for (int moveIndex = 0; moveIndex < moves.Length; moveIndex++) {
+            for (int moveIndex = 0, curMove; moveIndex < moves.Length; moveIndex++) {
                 string move = moves[moveIndex];
-                int curMove;
-                List<Marble> marbles = card.Rank == Rank.Ten ? allMarbles : teamMarbles;
                 Marble marble = marbles.FirstOrDefault(m => m.Letter == move[0], default);
-                if (marble == null) {
-                    return $"Bad marble ${move[0]}";
-                }
+                if (marble == null) return $"Bad marble {move[0]}";
                 bool hostile = card.Rank == Rank.Ten && teamMarbles.All(m => m.Letter != move[0]);
                 if (move.Length == 1) { // infer move
-                    if (card.Rank is Rank.Ten || card.Rank is Rank.Seven or Rank.Nine && splitMove && moveIndex == 0) {
+                    if (card.Rank is Rank.Ten || card.Rank is Rank.Seven or Rank.Nine && splitMove && moveIndex == 0)
                         return $"Give distances for {card.Rank}";
-                    } else {
-                        curMove = card.Value;
-                        if (marble.IsHome) {
-                            if (card.IsAceOrFace) {
-                                curMove = 1;
-                            } else if (card.IsJoker) {
-                                curMove = 18 * 2 + 1; // opposite start
-                            } else {
-                                return $"Can't exit home w/ {card.Rank}";
-                            }
-                        }
-                    }
+                    
+                    curMove = card.Value;
+                    if (marble.IsHome)
+                        if (card.IsAceOrFace)
+                            curMove = Marble.START - Marble.HOME;
+                        else if (card.IsJoker)
+                            curMove = Marble.SIDE * 2 - Marble.HOME; // opposite start
+                        else
+                            return $"Can't exit home w/ {card.Rank}";
                 } else { // move specified
                     Marble click = card.Rank != Rank.Joker
                         ? null
                         : Players.SelectMany(p => p.Marbles).FirstOrDefault(m => m.Letter == move[1], default);
                     if (click != null) {
-                        if (click.IsHome) {
-                            return "Can't click home marble";
-                        } else if (click.IsSafe) {
-                            return "Can't click safe marble";
-                        } else if (click.Player == marble.Player) {
-                            return "Can't click same color";
-                        }
-                        if (card.Rank == Rank.Joker && marble.Position == 0) {
-                            marble.Position = 1; // move marble out of home
-                        }
-                        curMove = (72 + click.AbsPosition - marble.AbsPosition - 1) % 72 + 1;
+                        if (click.IsHome) return "Can't click home marble";
+                        if (click.IsSafe) return "Can't click safe marble";
+                        if (click.Player == marble.Player) return "Can't click same color";
+                        if (card.Rank == Rank.Joker && marble.IsHome)
+                            marble.Position = Marble.START; // move marble out of home
+                        curMove = (Marble.MAX + click.AbsPosition - marble.AbsPosition) % Marble.MAX;
                     } else {
-                        if (!int.TryParse(move[1..], out curMove) || curMove == 0) {
-                            return $"Bad move ${move}";
-                        } else if (marble.IsHome && (curMove != 1 || !card.IsAceOrFace) && !card.IsJoker) {
+                        if (!int.TryParse(move[1..], out curMove) || curMove == 0) return $"Bad move ${move}";
+                        if (marble.IsHome && (curMove != 1 || !card.IsAceOrFace) && !card.IsJoker)
                             return "Can't move marble out of home";
-                        } else if (marble.IsSafe) {
-                            if (Turn != marble.Player && Teammate != marble.Player) {
+                        if (marble.IsSafe)
+                            if (Turn != marble.Player && Teammate != marble.Player)
                                 return "Can't move safe marble";
-                            } else if (curMove < 0) {
+                            else if (curMove < 0)
                                 return "Can't move safe marble backwards";
-                            } else if (marble.Position + curMove > 0) {
+                            else if (marble.Position + curMove > Marble.MAX)
                                 return "Can't move marble past home";
-                            }
-                        }
                     }
                 }
 
-                if (marble.InLimbo && card.Rank != Rank.Ten && curMove >= 0) {
-                    return "Marble in limbo";
-                } else if (marble.IsHome && curMove != 1 && !card.IsJoker) {
-                    return "Can't move marble out of home";
-                } else if (!marble.IsHome && curMove != card.Value && !card.CanSplit && !card.IsJoker) {
-                    return $"Bad move {move} w/ {card}";
-                }
+                if (marble.InLimbo && card.Rank != Rank.Ten && curMove >= 0) return "Marble in limbo";
+                if (marble.IsHome && curMove != Marble.START - Marble.HOME && !card.IsJoker) return "Can't move marble out of home";
+                if (!marble.IsHome && curMove != card.Value && !card.CanSplit && !card.IsJoker) return $"Bad move {move} w/ {card}";
 
                 if (moveIndex > 0) {
                     bool isCorrectValue = Math.Abs(prevMove) + Math.Abs(curMove) == card.Value;
-                    if (card.Rank == Rank.Ten && !isCorrectValue) {
-                        return "Must be 10 steps";
-                    } else if (card.Rank == Rank.Ten && prevMarble.Player == marble.Player) {
-                        return "Must be 2 colors";
-                    } else if (card.Rank == Rank.Seven && (curMove < 0 || prevMove < 0 || !isCorrectValue)) {
-                        return "Must be 7 steps";
-                    } else if (card.Rank == Rank.Nine && (curMove < 0 == prevMove < 0 || !isCorrectValue)) {
-                        return "Must be 9 steps +/-";
-                    }
+                    if (card.Rank == Rank.Ten && !isCorrectValue) return "Must be 10 steps";
+                    if (card.Rank == Rank.Ten && prevMarble.Player == marble.Player) return "Must be 2 colors";
+                    if (card.Rank == Rank.Seven && (curMove < 0 || prevMove < 0 || !isCorrectValue)) return "Must be 7 steps";
+                    if (card.Rank == Rank.Nine && (curMove < 0 == prevMove < 0 || !isCorrectValue)) return "Must be 9 steps +/-";
                 }
 
-                string s = marble.Move(curMove, hostile, card.IsJoker ? null : Players[marble.Player].Marbles);
-                if (s != null) {
-                    return s;
-                }
+                string s = marble.Move(curMove, hostile, marble.IsHome || card.IsJoker ? null : Players[marble.Player].Marbles);
+                if (s != null) return s;
 
                 // chain of clicks
                 int pos = marble.AbsPosition;
                 var clicked = allMarbles.FirstOrDefault(m => m.AbsPosition == pos && m != marble && !m.IsSafe);
                 if (clicked != null) {
-                    if (clicked.Player == marble.Player) {
-                        return "Can't click same color";
-                    } else if (clicked.Player != marble.Teammate) {
-                        clicked.Position = 0; // send marble home
-                    } else {
-                        clicked.Position = 68; // send marble to safe entry
+                    if (clicked.Player == marble.Player) return "Can't click same color";
+                    if (clicked.Player != marble.Teammate(Players.Count))
+                        clicked.Position = Marble.HOME; // send marble home
+                    else {
+                        clicked.Position = Marble.ENTRY; // send marble to safe entry
                         pos = clicked.AbsPosition;
                         var clicked2 =
                             allMarbles.FirstOrDefault(m => m.AbsPosition == pos && m != clicked && !m.IsSafe);
                         if (clicked2 != null) {
-                            if (clicked2.Player == clicked.Player) {
-                                return "Can't click same color (2)";
-                            } else if (clicked2.Player != clicked.Teammate) {
-                                clicked2.Position = 0; // send marble home
-                            } else {
-                                clicked2.Position = 68; // send marble to safe entry
+                            if (clicked2.Player == clicked.Player) return "Can't click same color (2)";
+                            if (clicked2.Player != clicked.Teammate(Players.Count))
+                                clicked2.Position = Marble.HOME; // send marble home
+                            else {
+                                clicked2.Position = Marble.ENTRY; // send marble to safe entry
                                 var clicked3 = allMarbles.FirstOrDefault(m =>
                                     m.AbsPosition == clicked2.AbsPosition && m != clicked2 && !m.IsSafe);
-                                if (clicked3 != null) {
-                                    clicked3.Position = 0; // send marble home - can only be hostile
-                                }
+                                if (clicked3 != null)
+                                    clicked3.Position = Marble.HOME; // send marble home - can only be hostile
                             }
                         }
                     }
@@ -247,54 +208,35 @@ public class Board {
             Players[Turn].UseAndDraw(deck, card);
             saveMarbles = null; // prevent rollback
         } finally {
-            if (saveMarbles != null) {
-                RestoreMarbles(saveMarbles);
-            }
+            if (saveMarbles != null) RestoreMarbles(saveMarbles);
         }
         return null;
     }
 
     public void Paint() {
-        for (int i = 0; i < 9; i++) {
-            info[i] = info[i].PadRight(19)[..19];
-        }
-        string[] safes = ["abcde", "ABCDE", "fghij", "FGHIJ"];
-        string[] homes = ["klmno", "KLMNO", "pqrst", "PQRST"];
+        for (int i = 0; i < info.Length; i++)
+            info[i] = (info[i] ?? "").PadRight(19)[..19];
+        string[] safes = ["abcde", "ABCDE", "fghij", "FGHIJ"], homes = ["klmno", "KLMNO", "pqrst", "PQRST"];
         var board = Board.board.Select(row => row.ToArray()).ToArray();
-        foreach (var e in positionForChar) {
-            var (y, x) = e.Value;
-            board[y][x] = '.';
-        }
-
-        for (int i = 0; i < Players.Count; i++) {
-            int offset = i * 18;
-            var player = Players[i].Marbles;
-            for (int j = 0; j < player.Count; j++) {
-                int p = player[j].Position;
-                char c = player[j].Letter;
-                if (p == 0) { // Home
-                    foreach (var s in homes[i]) {
-                        if (FindAndSet(board, s, c)) {
-                            break;
-                        }
-                    }
-                } else if (p < 0) { // Safe
-                    char s = safes[i][-p - 1];
-                    FindAndSet(board, s, c);
-                } else {
-                    p = (p + offset + 61) % 72;
-                    if (p < 18) {
-                        board[18 - p][0] = c;
-                    } else if (p < 36) {
-                        board[0][p - 18] = c;
-                    } else if (p < 54) {
-                        board[p - 36][^1] = c;
-                    } else {
-                        board[^1][72 - p] = c;
-                    }
+        foreach (var e in positionForChar)
+            board[e.Value.y][e.Value.x] = '.';
+        
+        for (int i = 0; i < Players.Count; i++)
+            foreach (var m in Players[i].Marbles)
+                if (m.IsSafe)
+                    FindAndSet(board, safes[i][m.Position - Marble.ENTRY - 1], m.Letter);
+                else if (m.IsHome)
+                    _ = homes[i].FirstOrDefault(s => FindAndSet(board, s, m.Letter));
+                else {
+                    char c = m.Letter;
+                    int p = (m.AbsPosition + Marble.MAX - 10) % Marble.MAX;
+                    _ = (p / Marble.SIDE) switch {
+                        0 => board[Marble.SIDE - p][0] = c,
+                        1 => board[0][p - Marble.SIDE] = c,
+                        2 => board[p - Marble.SIDE * 2][^1] = c,
+                        _ => board[^1][Marble.MAX - p] = c
+                    };
                 }
-            }
-        }
 
         int il = 0;
         foreach (var line in board) {
@@ -321,112 +263,90 @@ public class Board {
         }
     }
 
-    public int Score(int player) =>
-        Players[player].Score() + Players[(player + 2) % 4].Score() + HomeImbalance(player)
-        - Players[(player + 1) % 4].Score() - Players[(player + 3) % 4].Score();
+    public int Score(int player) {
+        int teammate = (player + Players.Count / 2) % Players.Count, score = 0;
+        for (int i = 0; i < Players.Count; i++)
+            score += i == player || i == teammate ? Players[i].Score() : -Players[i].Score();
+        for (int i = 0; i < Players.Count / 2; i++)
+            score += i == player || i == teammate ? -HomeImbalance(i) : HomeImbalance(i);
+        return score;
+    }
 
-    public int HomeImbalance(int player) {
-        int c1 = Players[player].Marbles.Count(m => m.IsHome);
-        int c2 = Players[(player + 2) % 4].Marbles.Count(m => m.IsHome);
-        int c3 = Players[(player + 1) % 4].Marbles.Count(m => m.IsHome);
-        int c4 = Players[(player + 3) % 4].Marbles.Count(m => m.IsHome);
-        return -Math.Abs(c1 - c2) + Math.Abs(c3 - c4);
+    private int HomeImbalance(int player) {
+        int teammate = (player + Players.Count / 2) % Players.Count;
+        return Math.Abs(Players[player].Marbles.Count(m => m.IsHome) - Players[teammate].Marbles.Count(m => m.IsHome));
     }
 
     public int Score() => Score(Turn);
 
     public string Hand() => string.Join(',', Players[Turn].Hand);
 
-    public List<List<Marble>> SaveMarbles() =>
+    private List<List<Marble>> SaveMarbles() =>
         Players.Select((p, i) => p.Marbles.Select(m => new Marble(m.Letter, i) { Position = m.Position }).ToList())
             .ToList();
 
-    public void RestoreMarbles(List<List<Marble>> saveMarbles) {
+    private void RestoreMarbles(List<List<Marble>> saveMarbles) {
         for (int p = 0; p < Players.Count; p++) {
-            var player = Players[p].Marbles;
-            var savePlayer = saveMarbles[p];
-            for (int i = 0; i < player.Count; i++) {
+            List<Marble> player = Players[p].Marbles, savePlayer = saveMarbles[p];
+            for (int i = 0; i < player.Count; i++)
                 player[i].Position = savePlayer[i].Position;
-            }
         }
     }
 
-    public IEnumerable<string> PossiblePlays() { // not including discard
-        var allMarbles = AllMarbles();
-        var teamMarbles = TeamMarbles();
-        foreach (var card in Players[Turn].Hand) {
+    private IEnumerable<string> PossiblePlays() { // not including discard
+        List<Marble> allMarbles = AllMarbles(), teamMarbles = TeamMarbles();
+        foreach (var card in Players[Turn].Hand.ToList()) {
             if (card.CanSplit) {
-                if (card.Rank == Rank.Ten) { // must split
-                    int mi1 = 0;
-                    foreach (var m1 in allMarbles) {
-                        foreach (var m2 in allMarbles.Skip(++mi1)) {
-                            if (m1.Player == m2.Player) continue;
-                            for (int i = 1; i <= 9; i++) {
-                                yield return $"{card} {m1.Letter}{i} {m2.Letter}{10 - i}";
-                                yield return $"{card} {m1.Letter}{-i} {m2.Letter}{10 - i}";
-                                yield return $"{card} {m1.Letter}{i} {m2.Letter}{-(10 - i)}";
-                                yield return $"{card} {m1.Letter}{-i} {m2.Letter}{-(10 - i)}";
-                            }
-                        }
-                    }
-                } else {
-                    int mi1 = 0;
-                    foreach (var m1 in teamMarbles) {
-                        foreach (var m2 in teamMarbles.Skip(++mi1)) {
-                            for (int i = 1; i < (int)card.Rank; i++) {
-                                string prefix = $"{card} {m1.Letter}{i} {m2.Letter}";
-                                if (card.Rank == Rank.Seven) {
-                                    yield return $"{prefix}{7 - i}";
-                                } else {
-                                    yield return $"{prefix}{-(9 - i)}";
-                                }
-                            }
-                        }
-                    }
-                }
+                int mi1 = 0;
+                if (card.MustSplit) {
+                    foreach (var m1 in allMarbles)
+                        foreach (var m2 in allMarbles.Skip(++mi1))
+                            if (m1.Player != m2.Player)
+                                for (int i = 1; i < (int)card.Rank; i++)
+                                    for (int mul1 = -1; mul1 <= 1; mul1 += 2)
+                                        for (int mul2 = -1; mul2 <= 1; mul2 += 2)
+                                            yield return $"{card} {m1.Letter}{i * mul1} {m2.Letter}{(10 - i) * mul2}";
+                } else
+                    foreach (var m1 in teamMarbles)
+                        foreach (var m2 in teamMarbles.Skip(++mi1))
+                            for (int i = 1; i < (int)card.Rank; i++)
+                                yield return $"{card} {m1.Letter}{i} {m2.Letter}" +
+                                             (card.Rank == Rank.Seven ? 7 - i : -(9 - i));
             }
             if (card.IsJoker) {
-                foreach (var m1 in allMarbles) {
-                    foreach (var m2 in allMarbles) {
-                        if (m1.Player != m2.Player) continue;
-                        yield return $"{card} {m1.Letter}{m2.Letter}";
-                    }
-                }
-            }
-            if (!card.MustSplit && !card.IsJoker) {
-                foreach (var m in teamMarbles) {
+                foreach (var m1 in allMarbles)
+                    foreach (var m2 in allMarbles)
+                        if (m1.Player == m2.Player)
+                            yield return $"{card} {m1.Letter}{m2.Letter}";
+            } else if (!card.MustSplit)
+                foreach (var m in teamMarbles)
                     yield return $"{card} {m.Letter}";
-                }
-            }
         }
     }
 
     public string AutoPlay() {
-        int maxScore = int.MinValue;
+        List<List<Marble>> saveState = SaveMarbles();
+        List<Card> saveCards = new(Players[Turn].Hand), saveDeck = deck.SaveCards();
+        int maxScore = int.MinValue, saveTurn = Turn;
         string maxPlay = null;
-        var saveState = SaveMarbles();
-        var saveCards = new List<Card>(Players[Turn].Hand);
-        var saveDeck = deck.SaveCards();
-        int saveTurn = Turn;
-        foreach (var play in PossiblePlays().ToList()) {
+        foreach (string play in PossiblePlays()) {
             string err = Play(play);
             if (err == null) {
-                deck.RestoreCards(saveDeck);
-                int score = Score();
-                var card = new Card(play[..2]);
+                Card card = new(play[..2]);
                 // subtract card worth to avoid using high value cards on low scoring moves
-                score -= card.Rank.Worth();
+                int score = Score() - card.Rank.Worth();
                 if (score > maxScore) {
                     maxScore = score;
                     maxPlay = play;
                 }
+                // restore state
+                deck.RestoreCards(saveDeck);
                 RestoreMarbles(saveState);
                 Turn = saveTurn;
                 Players[Turn].Hand.Clear();
                 Players[Turn].Hand.AddRange(saveCards);
             }
         }
-        maxPlay ??= $"{saveCards.OrderBy(c => c.Rank.Worth()).First()} x"; // discard
-        return maxPlay;
+        return maxPlay ?? $"{saveCards.OrderBy(c => c.Rank.Worth()).First()} x"; // discard
     }
 }

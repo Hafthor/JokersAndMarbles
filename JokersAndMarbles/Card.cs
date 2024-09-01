@@ -18,26 +18,22 @@ public class Card {
         Suit = Suit.None;
         Rank = Rank.Joker;
         if (str[0] != 'J' || str[1] != 'o') {
-            if (char.IsDigit(str[0])) {
+            if (char.IsDigit(str[0]))
                 Rank = (Rank)(str[1] - '0');
-            } else {
-                foreach (var v in Enum.GetValues<Rank>()) {
+            else
+                foreach (var v in Enum.GetValues<Rank>())
                     if (v != Rank.Joker && v.ToString()[0] == str[0]) {
                         Rank = v;
                         break;
                     }
-                }
-            }
             char f = char.ToUpper(str[1]);
-            foreach (var v in Enum.GetValues<Suit>()) {
+            foreach (var v in Enum.GetValues<Suit>())
                 if (v != Suit.None && v.ToString()[0] == f) {
                     Suit = v;
                     break;
                 }
-            }
-            if (Rank == Rank.Joker || Suit == Suit.None) {
+            if (Rank == Rank.Joker || Suit == Suit.None)
                 throw new ArgumentException($"Invalid card {str}");
-            }
         }
     }
 
