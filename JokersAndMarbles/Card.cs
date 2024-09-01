@@ -15,11 +15,12 @@ public class Card {
     }
 
     public Card(string str) {
-        suit = Suit.None;
-        rank = Rank.Joker;
-        if (str[0] != 'J' || str[1] != 'o') {
+        if (str[0] == 'J' && str[1] == 'o') {
+            suit = Suit.None;
+            rank = Rank.Joker;
+        } else {
             if (char.IsDigit(str[0]))
-                rank = (Rank)(str[1] - '0');
+                rank = (Rank)(str[0] - '0');
             else
                 foreach (var v in Enum.GetValues<Rank>())
                     if (v != Rank.Joker && v.ToString()[0] == str[0]) {
