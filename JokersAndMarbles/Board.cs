@@ -147,7 +147,7 @@ public class Board {
                             marble.Position = Marble.START; // move marble out of home
                         curMove = (Marble.MAX + click.AbsPosition - marble.AbsPosition) % Marble.MAX;
                     } else {
-                        if (!int.TryParse(move[1..], out curMove) || curMove == 0) return $"Bad move ${move}";
+                        if (!int.TryParse(move[1..], out curMove) || curMove == 0) return $"Bad move {move}";
                         if (marble.IsHome && (curMove != 1 || !card.IsAceOrFace) && !card.IsJoker)
                             return "Can't move marble out of home";
                         if (marble.IsSafe)
