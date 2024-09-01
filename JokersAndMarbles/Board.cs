@@ -24,7 +24,7 @@ public class Board {
     //11 x                   o         o68   x 63
     //   x o o o o o o o o o o o o o o o o o o
     //10   9 8 7 6 5 4 3 2 1 0-1-2-3-4676665   64
-    private static readonly ImmutableArray<ImmutableArray<char>> board = """
+    private static readonly ImmutableArray<ImmutableArray<char>> board4 = """
         ..*.....*.....*....
         .  f    p         .
         .  g    q         *
@@ -68,8 +68,8 @@ public class Board {
         //     1234567890123456789
         Print("Jokers and Marbles");
 
-        for (int r = 0; r < board.Length; r++) {
-            var row = board[r];
+        for (int r = 0; r < board4.Length; r++) {
+            var row = board4[r];
             for (int c = 0; c < row.Length; c++)
                 if (char.IsLetter(row[c]))
                     positionForChar[row[c]] = (y: r, x: c);
@@ -240,7 +240,7 @@ public class Board {
         for (int i = 0; i < info.Length; i++)
             info[i] = (info[i] ?? "").PadRight(19)[..19];
         string[] safes = ["abcde", "ABCDE", "fghij", "FGHIJ"], homes = ["klmno", "KLMNO", "pqrst", "PQRST"];
-        var board = Board.board.Select(row => row.ToArray()).ToArray();
+        var board = Board.board4.Select(row => row.ToArray()).ToArray();
         foreach (var e in positionForChar)
             board[e.Value.y][e.Value.x] = '.';
 
