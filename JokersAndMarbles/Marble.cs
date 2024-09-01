@@ -9,7 +9,7 @@ public class Marble(char letter, int player) {
     public int Offset => Player * SIDE;
     public bool IsHome => Position == HOME;
     public bool IsSafe => Position > ENTRY;
-    public bool InLimbo => !IsHome && Position < HOME; // will be 18*players - 4
+    public bool InLimbo => !IsHome && Position < START; // will be 18*players - 4
     public bool OnBoard => !IsHome && !IsSafe && !InLimbo;
 
     public int AbsPosition =>
