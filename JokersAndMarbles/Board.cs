@@ -24,108 +24,134 @@ public class Board {
     //11 x                   o         o68   x 63
     //   x o o o o o o o o o o o o o o o o o o
     //10   9 8 7 6 5 4 3 2 1 0-1-2-3-4676665   64
+    // ascii without . $ * and space
+    //     home        safe
+    // A   ! " # % &   ' ( ) + ,
+    // B   0 1 2 3 4   5 6 7 8 9
+    // C   : ; < = >   A B C D E
+    // D   F G H I J   K L M N O
+    // E   P Q R S T   U V W X Y
+    // F   [ \ ] ^ _   a b c d e
+    // G   f g h i j   k l m n o
+    // H   p q r s t   u v w x y
+    
+    // legend by player, home/safe, and board position
+    private const int LEGEND_HOME = 0, LEGEND_SAFE = 1;
+    private static readonly ImmutableArray<ImmutableArray<ImmutableArray<char>>> legend =
+        "!\"#%&.'()+,*01234.56789*:;<=>.ABCDE*FGHIJ.KLMNO*PQRST.UVWXY*[\\]^_.abcde*fghij.klmno*pqrst.uvwxy"
+            .Split('*').Select(s => s.Split('.').Select(s => s.ToCharArray().ToImmutableArray()).ToImmutableArray())
+            .ToImmutableArray();
+
     private static readonly ImmutableArray<ImmutableArray<char>> board4 = """
         ..*.....*.....*....
-        .  f    p         .
-        .  g    q         *
-        .  hij tsr     HGF.
-        *              I  .
+        .  A    :         .
+        .  B    ;         *
+        .  CDE >=<     MLK.
+        *              N  .
+        .   $          O  .
+        .   $             .
         .   $          J  .
+        .   $          IGF*
+        .  2$          H  .
+        *013$             .
+        .  4$             .
         .   $             .
-        .   $          T  .
-        .   $          SQP*
-        .  M$          R  .
-        *KLN$             .
-        .  O$             .
-        .   $             .
-        .  E$             .
-        .  D              *
-        .ABC     mno edc  .
-        *         l    b  .
-        .         k    a  .
+        .  9$             .
+        .  8              *
+        .567     #%& ,+)  .
+        *         "    (  .
+        .         !    '  .
         ....*.....*.....*..
         """
         .Split('\n').Select(s => s.ToCharArray().ToImmutableArray()).ToImmutableArray();
     
     private static readonly ImmutableArray<ImmutableArray<char>> board6 = """
         ..*.....*.....*......*.....*.....*....
-        .  f    p             f    p         .
-        .  g    q             g    q         *
-        .  hij tsr            hij tsr     HGF.
-        *                                 I  .
+        .  5    0             A    :         .
+        .  6    1             B    ;         *
+        .  789 432            CDE >=<     MLK.
+        *                                 N  .
+        .   $                             O  .
+        .   $                                .
         .   $                             J  .
+        .   $                             IGF*
+        .  #$                             H  .
+        *!"%$                                .
+        .  &$                                .
         .   $                                .
-        .   $                             T  .
-        .   $                             SQP*
-        .  M$                             R  .
-        *KLN$                                .
-        .  O$                                .
-        .   $                                .
-        .  E$                                .
-        .  D                                 *
-        .ABC     mno edc            mno edc  .
-        *         l    b             l    b  .
-        .         k    a             k    a  .
+        .  ,$                                .
+        .  +                                 *
+        .'()     ]^_ edc            RST YXW  .
+        *         \    b             Q    V  .
+        .         [    a             P    U  .
         ....*.....*.....*......*.....*.....*..
         """
         .Split('\n').Select(s => s.ToCharArray().ToImmutableArray()).ToImmutableArray();
     
     private static readonly ImmutableArray<ImmutableArray<char>> board8 = """
         ..*.....*.....*......*.....*.....*....
-        .  f    p             f    p         .
-        .  g    q             g    q         *
-        .  hij tsr            hij tsr     HGF.
-        *                                 I  .
-        .   $                             J  .
+        .  A    :             K    F         .
+        .  B    ;             L    G         *
+        .  CDE >=<            MNO JIH     WVU.
+        *                                 X  .
+        .   $                             Y  .
         .   $                                .
         .   $                             T  .
         .   $                             SQP*
-        .  M$                             R  .
-        *KLN$                                .
-        .  O$                                .
+        .  2$                             R  .
+        *013$                                .
+        .  4$                                .
         .   $                                .
-        .  E$                                .
-        .  D$                                *
-        .ABC$                                .
+        .  9$                                .
+        .  8$                                *
+        .567$                                .
         *   $                                .
         .   $                                .
         .   $                                .
         .   $                                .
         .   $                                .
         .   $                                *
-        .   $                             HGF.
-        *   $                             I  .
-        .   $                             J  .
+        .   $                             cba.
+        *   $                             d  .
+        .   $                             e  .
         .   $                                .
-        .   $                             T  .
-        .   $                             SQP*
-        .  M$                             R  .
-        *KLN$                                .
-        .  O$                                .
+        .   $                             _  .
+        .   $                             ^\[*
+        .  #$                             ]  .
+        *!"%$                                .
+        .  &$                                .
         .   $                                .
-        .  E$                                .
-        .  D                                 *
-        .ABC     mno edc            mno edc  .
-        *         l    b             l    b  .
-        .         k    a             k    a  .
+        .  ,$                                .
+        .  +                                 *
+        .'()     rst yxw            hij onm  .
+        *         q    v             g    l  .
+        .         p    u             f    k  .
         ....*.....*.....*......*.....*.....*..
         """
         .Split('\n').Select(s => s.ToCharArray().ToImmutableArray()).ToImmutableArray();
 
-    private readonly string[] info = new string[9];
+    private readonly string[] info;
     private readonly Deck deck;
-    private readonly Dictionary<char, (int y, int x)> positionForChar = new(5 * 2 * 4);
-    private readonly Player[] players = new Player[4];
+    private readonly Dictionary<char, (int y, int x)> positionForChar = new();
+    private readonly Player[] players;
+    private readonly ImmutableArray<ImmutableArray<char>> board;
 
     public int Turn { get; private set; }
     public int Teammate => (Turn + players.Length / 2) % players.Length;
     public bool Win => players[Turn].marbles.All(m => m.IsSafe) && players[Teammate].marbles.All(m => m.IsSafe);
 
-    public Board(Deck deck) {
+    public Board(Deck deck, int playerCount) {
+        players = new Player[playerCount];
+        board = playerCount switch {
+            4 => board4,
+            6 => board6,
+            8 => board8,
+            _ => throw new ArgumentException("Invalid player count")
+        };
+        info = new string[playerCount == 8 ? 9 + 18 : 9];
         this.deck = deck;
-        // marble letters for up to 8 players, although only 4 are used presently
         var marbleLetters = new[] { "ABCDE", "FGHIJ", "abcde", "fghij", "KLMNO", "PQRST", "klmno", "pqrst" };
-        for (int p = 0, m = 0, l = players.Length / 2, t = l; p < l;) {
+        for (int p = 0, m = 0, l = playerCount / 2, t = l; p < l;) {
             players[p] = new Player(p++, deck, marbleLetters[m++]);
             players[t] = new Player(t++, deck, marbleLetters[m++]);
         }
@@ -133,19 +159,20 @@ public class Board {
         //     1234567890123456789
         Print("Jokers and Marbles");
 
-        for (int r = 0; r < board4.Length; r++) {
-            var row = board4[r];
+        for (int r = 0; r < board.Length; r++) {
+            var row = board[r];
             for (int c = 0; c < row.Length; c++)
-                if (char.IsLetter(row[c]))
+                if (row[c] is not ' ' and not '.' and not '*' and not '$')
                     positionForChar[row[c]] = (y: r, x: c);
         }
     }
 
     public void Print(string s) {
+        int w = players.Length > 4 ? 19 + 18 + 18 : 19;
         while (s.Length > 0) {
-            Array.Copy(info, 1, info, 0, 8);
-            info[8] = s.PadRight(19)[..19];
-            s = s.Length > 19 ? s[19..] : "";
+            Array.Copy(info, 1, info, 0, info.Length - 1);
+            info[^1] = s.PadRight(w)[..w];
+            s = s.Length > w ? s[w..] : "";
         }
     }
 
@@ -304,7 +331,6 @@ public class Board {
     public void Paint() {
         for (int i = 0; i < info.Length; i++)
             info[i] = (info[i] ?? "").PadRight(19)[..19];
-        string[] safes = ["abcde", "ABCDE", "fghij", "FGHIJ"], homes = ["klmno", "KLMNO", "pqrst", "PQRST"];
         var board = Board.board4.Select(row => row.ToArray()).ToArray();
         foreach (var e in positionForChar)
             board[e.Value.y][e.Value.x] = '.';
@@ -312,9 +338,9 @@ public class Board {
         for (int i = 0; i < players.Length; i++)
             foreach (var m in players[i].marbles)
                 if (m.IsSafe)
-                    FindAndSet(board, safes[i][m.Position - Marble.ENTRY - 1], m.Letter);
+                    FindAndSet(board, legend[i][LEGEND_SAFE][m.Position - Marble.ENTRY - 1], m.Letter);
                 else if (m.IsHome)
-                    _ = homes[i].FirstOrDefault(s => FindAndSet(board, s, m.Letter));
+                    _ = legend[i][LEGEND_HOME].FirstOrDefault(s => FindAndSet(board, s, m.Letter));
                 else {
                     char c = m.Letter;
                     int p = (m.AbsPosition + Marble.MAX - 10) % Marble.MAX;

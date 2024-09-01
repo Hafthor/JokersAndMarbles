@@ -4,7 +4,7 @@ public class Game {
     private readonly Board board;
     private readonly Deck deck;
 
-    public Game(Random rnd) => board = new Board(new Deck().Shuffle(rnd));
+    public Game(Random rnd) => board = new Board(new Deck().Shuffle(rnd), 4);
 
     public void Run() {
         for (;;) {
