@@ -22,19 +22,9 @@ public class Card {
             if (char.IsDigit(str[0]))
                 rank = (Rank)(str[0] - '0');
             else
-                foreach (var v in Enum.GetValues<Rank>())
-                    if (v != Rank.Joker && v.ToString()[0] == str[0]) {
-                        rank = v;
-                        break;
-                    }
+                rank = Enum.GetValues<Rank>().First(r => r != Rank.Joker && r.ToString()[0] == str[0]);
             char f = char.ToUpper(str[1]);
-            foreach (var v in Enum.GetValues<Suit>())
-                if (v != Suit.None && v.ToString()[0] == f) {
-                    suit = v;
-                    break;
-                }
-            if (rank == Rank.Joker || suit == Suit.None)
-                throw new ArgumentException($"Invalid card {str}");
+            suit = Enum.GetValues<Suit>().First(s => s != Suit.None && s.ToString()[0] == f);
         }
     }
 
