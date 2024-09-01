@@ -15,7 +15,7 @@ public class Marble(char letter, int player) {
     public int AbsPosition =>
         !IsHome && !IsSafe ? (Position + LIMBOS + Offset) % MAX - LIMBOS : Position; // for non-home/safe marbles
 
-    public string Move(int steps, bool hostile, List<Marble> sameColorMarbles) {
+    public string Move(int steps, bool hostile, Marble[] sameColorMarbles) {
         if (hostile) {
             if (IsHome) return "Can't move marble in home";
             if (IsSafe) return "Cannot move safe marble";
@@ -49,6 +49,7 @@ public class Marble(char letter, int player) {
         if (Position is >= 0 and <= 3) return 30 - Position; // can back up spots
         int score = 15 + Position; // 15 to 82 
         if (Position is SIDE or SIDE * 3) score -= 10; // opponent start
+        if (Position is SIDE * 2) score += 10; // teammate start
         if (Position is >= 10 and <= 13 or >= 10 + SIDE * 2 and <= 13 + SIDE * 2) score -= 5; // entry to opponent safe
         return score;
     }

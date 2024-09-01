@@ -1,45 +1,60 @@
 namespace JokersAndMarbles;
 
 public class Card {
-    public Suit Suit { get; }
-    public Rank Rank { get; }
+    public readonly Suit suit;
+    public readonly Rank rank;
 
-    public bool IsAceOrFace => Rank is Rank.Ace or >= Rank.Jack;
-    public bool IsJoker => Rank is Rank.Joker;
-    public bool CanSplit => Rank is Rank.Seven or Rank.Nine or Rank.Ten;
-    public bool MustSplit => Rank is Rank.Ten;
+    public bool IsAceOrFace => rank is Rank.Ace or >= Rank.Jack;
+    public bool IsJoker => rank is Rank.Joker;
+    public bool CanSplit => rank is Rank.Seven or Rank.Nine or Rank.Ten;
+    public bool MustSplit => rank is Rank.Ten;
 
     public Card(Suit suit, Rank rank) {
-        Suit = suit;
-        Rank = rank;
+        this.suit = suit;
+        this.rank = rank;
     }
 
     public Card(string str) {
-        Suit = Suit.None;
-        Rank = Rank.Joker;
+        suit = Suit.None;
+        rank = Rank.Joker;
         if (str[0] != 'J' || str[1] != 'o') {
             if (char.IsDigit(str[0]))
-                Rank = (Rank)(str[1] - '0');
+                rank = (Rank)(str[1] - '0');
             else
                 foreach (var v in Enum.GetValues<Rank>())
                     if (v != Rank.Joker && v.ToString()[0] == str[0]) {
-                        Rank = v;
+                        rank = v;
                         break;
                     }
             char f = char.ToUpper(str[1]);
             foreach (var v in Enum.GetValues<Suit>())
                 if (v != Suit.None && v.ToString()[0] == f) {
-                    Suit = v;
+                    suit = v;
                     break;
                 }
-            if (Rank == Rank.Joker || Suit == Suit.None)
+            if (rank == Rank.Joker || suit == Suit.None)
                 throw new ArgumentException($"Invalid card {str}");
         }
     }
 
     public override string ToString() => !IsJoker
-        ? $"{(IsAceOrFace || Rank == Rank.Ten ? Rank.ToString()[..1] : ((int)Rank).ToString())}{char.ToLower(Suit.ToString()[0])}"
+        ? $"{(IsAceOrFace || rank == Rank.Ten ? rank.ToString()[..1] : ((int)rank).ToString())}{char.ToLower(suit.ToString()[0])}"
         : "Jo";
 
-    public int Value => Rank == Rank.Eight ? -8 : (int)Rank;
+    public int Value => rank == Rank.Eight ? -8 : (int)rank;
+
+    public int Worth => rank switch {
+        Rank.Joker => 11,
+        Rank.Ten => 10,
+        Rank.Nine => 9,
+        Rank.Eight => 7,
+        Rank.Seven => 5,
+        Rank.Ace => 3,
+        Rank.King => 3,
+        Rank.Queen => 2,
+        Rank.Jack => 2,
+        Rank.Two => 1,
+        Rank.Three => 1,
+        _ => 0
+    };
 }
