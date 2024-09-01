@@ -46,6 +46,71 @@ public class Board {
         ....*.....*.....*..
         """
         .Split('\n').Select(s => s.ToCharArray().ToImmutableArray()).ToImmutableArray();
+    
+    private static readonly ImmutableArray<ImmutableArray<char>> board6 = """
+        ..*.....*.....*......*.....*.....*....
+        .  f    p             f    p         .
+        .  g    q             g    q         *
+        .  hij tsr            hij tsr     HGF.
+        *                                 I  .
+        .   $                             J  .
+        .   $                                .
+        .   $                             T  .
+        .   $                             SQP*
+        .  M$                             R  .
+        *KLN$                                .
+        .  O$                                .
+        .   $                                .
+        .  E$                                .
+        .  D                                 *
+        .ABC     mno edc            mno edc  .
+        *         l    b             l    b  .
+        .         k    a             k    a  .
+        ....*.....*.....*......*.....*.....*..
+        """
+        .Split('\n').Select(s => s.ToCharArray().ToImmutableArray()).ToImmutableArray();
+    
+    private static readonly ImmutableArray<ImmutableArray<char>> board8 = """
+        ..*.....*.....*......*.....*.....*....
+        .  f    p             f    p         .
+        .  g    q             g    q         *
+        .  hij tsr            hij tsr     HGF.
+        *                                 I  .
+        .   $                             J  .
+        .   $                                .
+        .   $                             T  .
+        .   $                             SQP*
+        .  M$                             R  .
+        *KLN$                                .
+        .  O$                                .
+        .   $                                .
+        .  E$                                .
+        .  D$                                *
+        .ABC$                                .
+        *   $                                .
+        .   $                                .
+        .   $                                .
+        .   $                                .
+        .   $                                .
+        .   $                                *
+        .   $                             HGF.
+        *   $                             I  .
+        .   $                             J  .
+        .   $                                .
+        .   $                             T  .
+        .   $                             SQP*
+        .  M$                             R  .
+        *KLN$                                .
+        .  O$                                .
+        .   $                                .
+        .  E$                                .
+        .  D                                 *
+        .ABC     mno edc            mno edc  .
+        *         l    b             l    b  .
+        .         k    a             k    a  .
+        ....*.....*.....*......*.....*.....*..
+        """
+        .Split('\n').Select(s => s.ToCharArray().ToImmutableArray()).ToImmutableArray();
 
     private readonly string[] info = new string[9];
     private readonly Deck deck;
