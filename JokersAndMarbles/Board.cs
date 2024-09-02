@@ -448,11 +448,14 @@ public class Board {
                                         for (int mul2 = -1; mul2 <= 1; mul2 += 2)
                                             yield return $"{card} {m1.Letter}{i * mul1} {m2.Letter}{(10 - i) * mul2}";
             if (card.IsJoker)
-                foreach (var m1 in allMarbles)
+                foreach (var m1 in allMarbles) {
                     foreach (var m2 in allMarbles)
                         if (m1.player == m2.player)
                             yield return $"{card} {m1.Letter}{m2.Letter}";
-            if (!card.MustSplit)
+                    if (m1.IsHome)
+                        yield return $"{card} {m1.Letter}";
+                }
+            else if (!card.MustSplit)
                 foreach (var m in teamMarbles)
                     yield return $"{card} {m.Letter}";
         }
