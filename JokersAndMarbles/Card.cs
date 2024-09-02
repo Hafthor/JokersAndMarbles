@@ -1,40 +1,40 @@
 namespace JokersAndMarbles;
 
 public class Card {
-    public readonly Suit suit;
-    public readonly Rank rank;
+    public readonly Suit Suit;
+    public readonly Rank Rank;
 
-    public bool IsAceOrFace => rank is Rank.Ace or >= Rank.Jack;
-    public bool IsJoker => rank is Rank.Joker;
-    public bool CanSplit => rank is Rank.Seven or Rank.Nine or Rank.Ten;
-    public bool MustSplit => rank is Rank.Ten;
+    public bool IsAceOrFace => Rank is Rank.Ace or >= Rank.Jack;
+    public bool IsJoker => Rank is Rank.Joker;
+    public bool CanSplit => Rank is Rank.Seven or Rank.Nine or Rank.Ten;
+    public bool MustSplit => Rank is Rank.Ten;
 
     public Card(Suit suit, Rank rank) {
-        this.suit = suit;
-        this.rank = rank;
+        Suit = suit;
+        Rank = rank;
     }
 
     public Card(string str) {
         if (str[0] == 'J' && str[1] == 'o') {
-            suit = Suit.None;
-            rank = Rank.Joker;
+            Suit = Suit.None;
+            Rank = Rank.Joker;
         } else {
             if (char.IsDigit(str[0]))
-                rank = (Rank)(str[0] - '0');
+                Rank = (Rank)(str[0] - '0');
             else
-                rank = Enum.GetValues<Rank>().First(r => r != Rank.Joker && r.ToString()[0] == str[0]);
+                Rank = Enum.GetValues<Rank>().First(r => r != Rank.Joker && r.ToString()[0] == str[0]);
             char f = char.ToUpper(str[1]);
-            suit = Enum.GetValues<Suit>().First(s => s != Suit.None && s.ToString()[0] == f);
+            Suit = Enum.GetValues<Suit>().First(s => s != Suit.None && s.ToString()[0] == f);
         }
     }
 
     public override string ToString() => !IsJoker
-        ? $"{(IsAceOrFace || rank == Rank.Ten ? rank.ToString()[..1] : ((int)rank).ToString())}{char.ToLower(suit.ToString()[0])}"
+        ? $"{(IsAceOrFace || Rank == Rank.Ten ? Rank.ToString()[..1] : ((int)Rank).ToString())}{char.ToLower(Suit.ToString()[0])}"
         : "Jo";
 
-    public int Value => rank == Rank.Eight ? -8 : (int)rank;
+    public int Value => Rank == Rank.Eight ? -8 : (int)Rank;
 
-    public int Worth => rank switch {
+    public int Worth => Rank switch {
         Rank.Joker => 11,
         Rank.Ten => 10,
         Rank.Nine => 9,

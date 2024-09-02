@@ -1,24 +1,24 @@
 namespace JokersAndMarbles;
 
 public class Player {
-    public readonly Card[] hand;
-    public readonly Marble[] marbles;
+    public readonly Card[] Hand;
+    public readonly Marble[] Marbles;
 
     public Player(int player, Deck deck, string marbleLetters, int playerCount, int cards = 3) {
-        hand = new Card[cards];
+        Hand = new Card[cards];
         for (int card = 0; card < cards; card++)
-            hand[card] = deck.Draw();
-        marbles = new Marble[marbleLetters.Length];
+            Hand[card] = deck.Draw();
+        Marbles = new Marble[marbleLetters.Length];
         for (var i = 0; i < marbleLetters.Length; i++)
-            marbles[i] = new Marble(marbleLetters[i], player, playerCount);
+            Marbles[i] = new Marble(marbleLetters[i], player, playerCount);
     }
 
     public Card UseAndDraw(Deck deck, Card card) {
-        for (int i = 0; i < hand.Length; i++)
-            if (hand[i] == card)
-                return hand[i] = deck.UseAndDraw(card);
+        for (int i = 0; i < Hand.Length; i++)
+            if (Hand[i] == card)
+                return Hand[i] = deck.UseAndDraw(card);
         throw new ArgumentException($"Card {card} not found in hand");
     }
 
-    public int Score() => marbles.Select(m => m.Score()).Sum();
+    public int Score() => Marbles.Select(m => m.Score()).Sum();
 }
