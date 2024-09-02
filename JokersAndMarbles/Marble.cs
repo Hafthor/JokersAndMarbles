@@ -8,8 +8,7 @@ public class Marble(char letter, int player, int playerCount) {
         Ansi.RedBg + Ansi.BWhite, Ansi.BRedBg + Ansi.Black, Ansi.BBlackBg + Ansi.BWhite, Ansi.WhiteBg + Ansi.Black
     ];
 
-    public const int Home = -5, Start = 0, Side = 18;
-    private const int Limbos = 4;
+    public const int Home = -5, Start = 0, Side = 18, Limbos = 4;
     public readonly int PlayerCount = playerCount;
     public readonly int Max = playerCount * Side;
     public readonly int Entry = playerCount * Side - 5;
