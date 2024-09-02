@@ -205,11 +205,12 @@ public class Board {
             NextTurn();
             return null;
         }
-        if (!splitMove && card.MustSplit) return "Requires 2 moves";
-        if (splitMove && !card.CanSplit) return "Only 1 move";
         List<Marble> allMarbles = AllMarbles(),
             teamMarbles = TeamMarbles(),
             marbles = card.rank == Rank.Ten ? allMarbles : teamMarbles;
+        bool mustSplit = card.MustSplit || (card.rank == Rank.Nine && teamMarbles.Count(m => m.IsSafe) < 9);
+        if (!splitMove && mustSplit) return "Requires 2 moves";
+        if (splitMove && !card.CanSplit) return "Only 1 move";
 
         // save current state
         Marble[][] saveMarbles = SaveMarbles();
@@ -456,8 +457,9 @@ public class Board {
                         yield return $"{card} {m1.Letter}";
                 }
             else if (!card.MustSplit)
-                foreach (var m in teamMarbles)
-                    yield return $"{card} {m.Letter}";
+                if (card.rank != Rank.Nine || teamMarbles.Count(m => m.IsSafe) < 9)
+                    foreach (var m in teamMarbles)
+                        yield return $"{card} {m.Letter}";
         }
     }
 
