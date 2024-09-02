@@ -66,28 +66,28 @@ public class Board {
         .Split('\n').Select(s => s.ToCharArray().ToImmutableArray()).ToImmutableArray();
     
     private static readonly ImmutableArray<ImmutableArray<char>> Board6 = """
-        ..*.....*.....*......*.....*.....*....
-        .  A    :             K    F         .
-        .  B    ;             L    G         *
-        .  CDE >=<            MNO JIH     WVU.
-        *                                 X  .
-        .   $                             Y  .
-        .   $                                .
-        .   $                             T  .
-        .   $                             SQP*
-        .  2$                             R  .
-        *013$                                .
-        .  4$                                .
-        .   $                                .
-        .  9$                                .
-        .  8                                 *
-        .567     #%& ,+)            ]^_ edc  .
-        *         "    (             \    b  .
-        .         !    '             [    a  .
-        ....*.....*.....*......*.....*.....*..
+        ..*.....*.....*.....*.....*.....*....
+        .  A    :            K    F         .
+        .  B    ;            L    G         *
+        .  CDE >=<           MNO JIH     WVU.
+        *                                X  .
+        .   $                            Y  .
+        .   $                               .
+        .   $                            T  .
+        .   $                            SQP*
+        .  2$                            R  .
+        *013$                               .
+        .  4$                               .
+        .   $                               .
+        .  9$                               .
+        .  8                                *
+        .567     #%& ,+)           ]^_ edc  .
+        *         "    (            \    b  .
+        .         !    '            [    a  .
+        ....*.....*.....*.....*.....*.....*..
         """
         .Split('\n').Select(s => s.ToCharArray().ToImmutableArray()).ToImmutableArray();
-    
+
     private static readonly ImmutableArray<ImmutableArray<char>> Board8 = """
         ..*.....*.....*.....*.....*.....*....
         .  K    F            U    P         .
