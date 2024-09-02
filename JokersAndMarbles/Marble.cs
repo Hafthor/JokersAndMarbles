@@ -1,19 +1,28 @@
 namespace JokersAndMarbles;
 
-public class Marble(char letter, int player) {
-    public const int HOME = -5, START = 0, ENTRY = 67, MAX = 72, SIDE = 18, LIMBOS = 4;
-    public int Player { get; } = player;
-    public int Teammate(int players) => (Player + players / 2) % players;
+public class Marble(char letter, int player, int playerCount) {
+    public static readonly string[] MarbleLettersByTeams =
+        ["ABCDE", "FGHIJ", "abcde", "fghij", "KLMNO", "PQRST", "klmno", "pqrst"];
+    public static readonly string[] ColorsByTeams = [
+        Ansi.BlueBg + Ansi.BWhite, Ansi.BBlueBg + Ansi.Black, Ansi.GreenBg + Ansi.BWhite, Ansi.BGreenBg + Ansi.Black,
+        Ansi.RedBg + Ansi.BWhite, Ansi.BRedBg + Ansi.Black, Ansi.BBlackBg + Ansi.BWhite, Ansi.WhiteBg + Ansi.Black
+    ];
+    public const int HOME = -5, START = 0, SIDE = 18, LIMBOS = 4;
+    public readonly int playerCount = playerCount;
+    public readonly int MAX = playerCount * SIDE;
+    public readonly int ENTRY = playerCount * SIDE - 5;
+    public readonly int player = player;
+    public readonly int offset = player * SIDE;
+    public int Teammate => (player + playerCount / 2) % playerCount;
     public int Position { get; set; } = HOME; // -5=home, -4 to -1=limbo, 0-67=relative board position, 68-72=safe
     public char Letter { get; } = letter;
-    public int Offset => Player * SIDE;
     public bool IsHome => Position == HOME;
     public bool IsSafe => Position > ENTRY;
     public bool InLimbo => !IsHome && Position < START; // will be 18*players - 4
     public bool OnBoard => !IsHome && !IsSafe && !InLimbo;
 
     public int AbsPosition =>
-        !IsHome && !IsSafe ? (Position + LIMBOS + Offset) % MAX - LIMBOS : Position; // for non-home/safe marbles
+        !IsHome && !IsSafe ? (Position + LIMBOS + offset) % MAX - LIMBOS : Position; // for non-home/safe marbles
 
     public string Move(int steps, bool hostile, Marble[] sameColorMarbles) {
         if (hostile) {
@@ -53,4 +62,14 @@ public class Marble(char letter, int player) {
         if (Position is >= 10 and <= 13 or >= 10 + SIDE * 2 and <= 13 + SIDE * 2) score -= 5; // entry to opponent safe
         return score;
     }
+
+    public static string ColorForLetter(char letter) {
+        for (int i = 0; i < MarbleLettersByTeams.Length; i++)
+            if (MarbleLettersByTeams[i].Contains(letter))
+                return ColorsByTeams[i];
+        return null;
+    }
+
+    public static string ColorForPlayer(int player, int playerCount) =>
+        ColorsByTeams[player >= playerCount / 2 ? (player - playerCount / 2) * 2 + 1 : player * 2];
 }

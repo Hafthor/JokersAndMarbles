@@ -1,6 +1,10 @@
 ﻿namespace JokersAndMarbles;
 
 public class Program {
-    public static void Main(string[] args) =>
-        new Game(args.Length > 0 ? new Random(int.Parse(args[0])) : new Random(0)).Run();
+    public static void Main(string[] args) {
+        int players = args.Length > 0 ? int.Parse(args[0]) : 4;
+        Random random = args.Length > 1 ? new(int.Parse(args[1])) : new();
+        Game game = new(players, random);
+        game.Run();
+    }
 }

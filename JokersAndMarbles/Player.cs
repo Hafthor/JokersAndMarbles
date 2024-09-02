@@ -4,13 +4,13 @@ public class Player {
     public readonly Card[] hand;
     public readonly Marble[] marbles;
 
-    public Player(int player, Deck deck, string marbleLetters, int cards = 3) {
+    public Player(int player, Deck deck, string marbleLetters, int playerCount, int cards = 3) {
         hand = new Card[cards];
         for (int card = 0; card < cards; card++)
             hand[card] = deck.Draw();
         marbles = new Marble[marbleLetters.Length];
         for (var i = 0; i < marbleLetters.Length; i++)
-            marbles[i] = new Marble(marbleLetters[i], player);
+            marbles[i] = new Marble(marbleLetters[i], player, playerCount);
     }
 
     public Card UseAndDraw(Deck deck, Card card) {
@@ -21,4 +21,17 @@ public class Player {
     }
 
     public int Score() => marbles.Select(m => m.Score()).Sum();
+
+    public static string ColorForPlayer(int player) {
+        return player switch {
+            0 => Ansi.BlueBg,
+            1 => Ansi.BBlueBg,
+            2 => Ansi.GreenBg,
+            3 => Ansi.BGreenBg,
+            4 => Ansi.BrownBg,
+            5 => Ansi.YellowBg,
+            6 => Ansi.BBlackBg,
+            7 => Ansi.WhiteBg,
+        } + (player % 2 == 0 ? Ansi.BWhite : Ansi.Black);
+    }
 }
