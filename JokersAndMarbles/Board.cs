@@ -63,9 +63,8 @@ public class Board {
         .         !    '  .
         ....*.....*.....*..
         """
-        .Split('\n').Select(s => s.ToCharArray().ToImmutableArray()).ToImmutableArray();
-    
-    private static readonly ImmutableArray<ImmutableArray<char>> Board6 = """
+        .Split('\n').Select(s => s.ToCharArray().ToImmutableArray()).ToImmutableArray(),
+        Board6 = """
         ..*.....*.....*.....*.....*.....*....
         .  A    :            K    F         .
         .  B    ;            L    G         *
@@ -86,9 +85,8 @@ public class Board {
         .         !    '            [    a  .
         ....*.....*.....*.....*.....*.....*..
         """
-        .Split('\n').Select(s => s.ToCharArray().ToImmutableArray()).ToImmutableArray();
-
-    private static readonly ImmutableArray<ImmutableArray<char>> Board8 = """
+        .Split('\n').Select(s => s.ToCharArray().ToImmutableArray()).ToImmutableArray(),
+        Board8 = """
         ..*.....*.....*.....*.....*.....*....
         .  K    F            U    P         .
         .  L    G            V    Q         *

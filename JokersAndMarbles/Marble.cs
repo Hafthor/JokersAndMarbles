@@ -1,26 +1,20 @@
 namespace JokersAndMarbles;
 
 public class Marble(char letter, int player, int playerCount) {
-    public static readonly string[] MarbleLettersByTeams =
-        ["ABCDE", "FGHIJ", "abcde", "fghij", "KLMNO", "PQRST", "klmno", "pqrst"];
     public static readonly string[] ColorsByTeams = [
         Ansi.BlueBg + Ansi.BWhite, Ansi.BBlueBg + Ansi.Black, Ansi.GreenBg + Ansi.BWhite, Ansi.BGreenBg + Ansi.Black,
         Ansi.RedBg + Ansi.BWhite, Ansi.BRedBg + Ansi.Black, Ansi.BBlackBg + Ansi.BWhite, Ansi.WhiteBg + Ansi.Black
-    ];
+    ], MarbleLettersByTeams = ["ABCDE", "FGHIJ", "abcde", "fghij", "KLMNO", "PQRST", "klmno", "pqrst"];
 
     public const int Home = -5, Start = 0, Side = 18, Limbos = 4;
-    public readonly int PlayerCount = playerCount;
-    public readonly int Max = playerCount * Side;
-    public readonly int Entry = playerCount * Side - 5;
-    public readonly int Player = player;
-    public readonly int Offset = player * Side;
+    public readonly int PlayerCount = playerCount, Max = playerCount * Side, Entry = playerCount * Side - 5;
+    public readonly int Player = player, Offset = player * Side;
     public int Teammate => (Player + PlayerCount / 2) % PlayerCount;
     public int Position { get; set; } = Home; // -5=home, -4 to -1=limbo, 0-67=relative board position, 68-72=safe
     public char Letter { get; } = letter;
     public bool IsHome => Position == Home;
     public bool IsSafe => Position > Entry;
     public bool InLimbo => !IsHome && Position < Start; // will be 18*players - 4
-
     public int AbsPosition =>
         !IsHome && !IsSafe ? (Position + Limbos + Offset) % Max - Limbos : Position; // for non-home/safe marbles
 
