@@ -21,17 +21,4 @@ public class Player {
     }
 
     public int Score() => marbles.Select(m => m.Score()).Sum();
-
-    public static string ColorForPlayer(int player) {
-        return player switch {
-            0 => Ansi.BlueBg,
-            1 => Ansi.BBlueBg,
-            2 => Ansi.GreenBg,
-            3 => Ansi.BGreenBg,
-            4 => Ansi.BrownBg,
-            5 => Ansi.YellowBg,
-            6 => Ansi.BBlackBg,
-            7 => Ansi.WhiteBg,
-        } + (player % 2 == 0 ? Ansi.BWhite : Ansi.Black);
-    }
 }

@@ -67,29 +67,6 @@ public class Board {
     
     private static readonly ImmutableArray<ImmutableArray<char>> board6 = """
         ..*.....*.....*......*.....*.....*....
-        .  5    0             A    :         .
-        .  6    1             B    ;         *
-        .  789 432            CDE >=<     MLK.
-        *                                 N  .
-        .   $                             O  .
-        .   $                                .
-        .   $                             J  .
-        .   $                             IGF*
-        .  #$                             H  .
-        *!"%$                                .
-        .  &$                                .
-        .   $                                .
-        .  ,$                                .
-        .  +                                 *
-        .'()     ]^_ edc            RST YXW  .
-        *         \    b             Q    V  .
-        .         [    a             P    U  .
-        ....*.....*.....*......*.....*.....*..
-        """
-        .Split('\n').Select(s => s.ToCharArray().ToImmutableArray()).ToImmutableArray();
-    
-    private static readonly ImmutableArray<ImmutableArray<char>> board8 = """
-        ..*.....*.....*......*.....*.....*....
         .  A    :             K    F         .
         .  B    ;             L    G         *
         .  CDE >=<            MNO JIH     WVU.
@@ -103,30 +80,52 @@ public class Board {
         .  4$                                .
         .   $                                .
         .  9$                                .
-        .  8$                                *
-        .567$                                .
-        *   $                                .
-        .   $                                .
-        .   $                                .
-        .   $                                .
-        .   $                                .
-        .   $                                *
-        .   $                             cba.
-        *   $                             d  .
-        .   $                             e  .
-        .   $                                .
-        .   $                             _  .
-        .   $                             ^\[*
-        .  #$                             ]  .
-        *!"%$                                .
-        .  &$                                .
-        .   $                                .
-        .  ,$                                .
-        .  +                                 *
-        .'()     rst yxw            hij onm  .
-        *         q    v             g    l  .
-        .         p    u             f    k  .
+        .  8                                 *
+        .567     #%& ,+)            ]^_ edc  .
+        *         "    (             \    b  .
+        .         !    '             [    a  .
         ....*.....*.....*......*.....*.....*..
+        """
+        .Split('\n').Select(s => s.ToCharArray().ToImmutableArray()).ToImmutableArray();
+    
+    private static readonly ImmutableArray<ImmutableArray<char>> board8 = """
+        ..*.....*.....*.....*.....*.....*....
+        .  K    F            U    P         .
+        .  L    G            V    Q         *
+        .  MNO JIH           WXY TSR     cba.
+        *                                d  .
+        .   $                            e  .
+        .   $                               .
+        .   $                            _  .
+        .   $                            ^\[*
+        .  <$                            ]  .
+        *:;=$                               .
+        .  >$                               .
+        .   $                               .
+        .  E$                               .
+        .  D$                               *
+        .ABC$                               .
+        *   $                               .
+        .   $                               .
+        .   $                               .
+        .   $                               .
+        .   $                               *
+        .   $                            mlk.
+        *   $                            n  .
+        .   $                            o  .
+        .   $                               .
+        .   $                            j  .
+        .   $                            igf*
+        .  2$                            h  .
+        *013$                               .
+        .  4$                               .
+        .   $                               .
+        .  9$                               .
+        .  8                                *
+        .567     #%& ,+)           rst yxw  .
+        *         "    (            q    v  .
+        .         !    '            p    u  .
+        ....*.....*.....*.....*.....*.....*..
         """
         .Split('\n').Select(s => s.ToCharArray().ToImmutableArray()).ToImmutableArray();
 
@@ -148,7 +147,8 @@ public class Board {
             8 => board8,
             _ => throw new ArgumentException("Invalid player count")
         };
-        info = new string[playerCount == 8 ? 9 + 18 : 9];
+        int infoLines = board.Count(b => b.Contains('$'));
+        info = new string[infoLines];
         this.deck = deck;
         for (int p = 0, m = 0, l = playerCount / 2, t = l; p < l;) {
             players[p] = new Player(p++, deck, Marble.MarbleLettersByTeams[m++], players.Length);
@@ -431,9 +431,15 @@ public class Board {
     private IEnumerable<string> PossiblePlays() { // not including discard
         List<Marble> allMarbles = AllMarbles(), teamMarbles = TeamMarbles();
         foreach (var card in players[Turn].hand.ToArray()) {
-            if (card.CanSplit) {
-                int mi1 = 0;
-                if (card.MustSplit) {
+            int mi1 = 0;
+            if (card.CanSplit)
+                if (!card.MustSplit)
+                    foreach (var m1 in teamMarbles)
+                        foreach (var m2 in teamMarbles)
+                            for (int i = 1; m1 != m2 && i < (int)card.rank; i++)
+                                yield return $"{card} {m1.Letter}{i} {m2.Letter}" +
+                                             (card.rank == Rank.Seven ? 7 - i : -(9 - i));
+                else
                     foreach (var m1 in allMarbles)
                         foreach (var m2 in allMarbles.Skip(++mi1))
                             if (m1.player != m2.player)
@@ -441,13 +447,6 @@ public class Board {
                                     for (int mul1 = -1; mul1 <= 1; mul1 += 2)
                                         for (int mul2 = -1; mul2 <= 1; mul2 += 2)
                                             yield return $"{card} {m1.Letter}{i * mul1} {m2.Letter}{(10 - i) * mul2}";
-                } else
-                    foreach (var m1 in teamMarbles)
-                        foreach (var m2 in teamMarbles.Skip(++mi1))
-                            for (int i = 1; i < (int)card.rank; i++)
-                                yield return $"{card} {m1.Letter}{i} {m2.Letter}" +
-                                             (card.rank == Rank.Seven ? 7 - i : -(9 - i));
-            }
             if (card.IsJoker)
                 foreach (var m1 in allMarbles)
                     foreach (var m2 in allMarbles)
