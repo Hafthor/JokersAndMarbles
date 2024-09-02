@@ -20,7 +20,6 @@ public class Marble(char letter, int player, int playerCount) {
     public bool IsHome => Position == Home;
     public bool IsSafe => Position > Entry;
     public bool InLimbo => !IsHome && Position < Start; // will be 18*players - 4
-    public bool OnBoard => !IsHome && !IsSafe && !InLimbo;
 
     public int AbsPosition =>
         !IsHome && !IsSafe ? (Position + Limbos + Offset) % Max - Limbos : Position; // for non-home/safe marbles
