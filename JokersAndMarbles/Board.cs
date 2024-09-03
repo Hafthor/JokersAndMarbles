@@ -288,6 +288,7 @@ public class Board {
                         clicked.Position = Marble.Home; // send marble home
                         messages.Add($"Clicked {clicked.Letter}, sent home");
                     } else {
+                        if (clicked.Position == clicked.Entry) return "Can't click marble to its own location";
                         clicked.Position = clicked.Entry; // send marble to safe entry
                         messages.Add($"Clicked {clicked.Letter}, sent to entry");
                         pos = clicked.AbsPosition;
@@ -300,6 +301,7 @@ public class Board {
                                 clicked2.Position = Marble.Home; // send marble home
                                 messages.Add($"Clicked {clicked2.Letter}, sent home");
                             } else {
+                                if (clicked.Position == clicked.Entry) return "Can't click marble to its own location";
                                 clicked2.Position = clicked2.Entry; // send marble to safe entry
                                 messages.Add($"Clicked {clicked2.Letter}, sent to entry");
                                 var clicked3 = allMarbles.FirstOrDefault(m =>
