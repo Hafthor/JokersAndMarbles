@@ -1,7 +1,7 @@
 namespace JokersAndMarbles;
 
-public class Game(int playerCount, Random rnd) {
-    private readonly Board _board = new(playerCount, new Deck().Shuffle(rnd));
+public class Game(int playerCount, int seed) {
+    private readonly Board _board = new(playerCount, new Deck().Shuffle(seed));
 
     public void Run() {
         for (;;) {
@@ -10,6 +10,11 @@ public class Game(int playerCount, Random rnd) {
             Console.Write($"{clr}Player {_board.Turn}[{_board.Score()}]{Ansi.Reset} ({_board.Hand()}):");
             string sCmd = Console.ReadLine() ?? "";
             if (sCmd is "exit" or "quit") break;
+            if (sCmd is "seed") {
+                Console.WriteLine($"seed={seed}");
+                Console.ReadLine();
+                continue;
+            }
             if (sCmd == "plays") {
                 var plays = _board.LegalPlays().OrderByDescending(p => p.score);
                 Console.WriteLine(string.Join(", ", plays.Select(p => $"{p.play}={p.score}")));

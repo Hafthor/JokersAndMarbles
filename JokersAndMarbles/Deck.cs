@@ -36,7 +36,8 @@ public class Deck {
         _cards.AddRange(saveCards);
     }
 
-    public Deck Shuffle(Random rnd) { // Fisher-Yates shuffle
+    public Deck Shuffle(int seed) { // Fisher-Yates shuffle
+        Random rnd = new(seed);
         for (int i = _cards.Count - 1; i > 0; i--) {
             int j = rnd.Next(i + 1);
             (_cards[i], _cards[j]) = (_cards[j], _cards[i]);
