@@ -259,7 +259,8 @@ public class Board {
                     }
                 }
 
-                if (marble.InLimbo && card.Rank != Rank.Ten && curMove >= 0) return "Marble in limbo";
+                if (marble.InLimbo && card.Rank != Rank.Ten && card.Rank != Rank.Joker && curMove >= 0)
+                    return "Marble in limbo";
                 if (marble.IsHome && curMove != Marble.Start - Marble.Home && !card.IsJoker)
                     return "Can't move marble out of home";
                 if (!marble.IsHome && curMove != card.Value && !card.CanSplit && !card.IsJoker)
