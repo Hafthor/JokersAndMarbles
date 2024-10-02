@@ -4,11 +4,11 @@ public class Game(int playerCount, int seed) {
     private readonly Board _board = new(playerCount, new Deck().Shuffle(seed));
 
     public void Run() {
-        for (;;) {
+        for (bool fullAuto = false;;) {
             _board.Paint();
             string clr = Marble.ColorForPlayer(_board.Turn, playerCount);
-            Console.Write($"{clr}Player {_board.Turn}[{_board.Score()}]{Ansi.Reset} ({_board.Hand()}):");
-            string sCmd = Console.ReadLine() ?? "";
+            Console.Write($"{clr}Player {_board.Turn}[{_board.Score()}]{Ansi.Reset} ({_board.Hand()}):     \b\b\b\b\b");
+            string sCmd = fullAuto ? "auto" : Console.ReadLine() ?? "";
             if (sCmd is "exit" or "quit") break;
             if (sCmd is "seed") {
                 Console.WriteLine($"seed={seed}");
@@ -20,6 +20,10 @@ public class Game(int playerCount, int seed) {
                 Console.WriteLine(string.Join(", ", plays.Select(p => $"{p.play}={p.score}")));
                 Console.ReadLine();
                 continue;
+            }
+            if (sCmd == "fullauto") {
+                fullAuto = true;
+                sCmd = "auto";
             }
             if (sCmd is "" or "auto") sCmd = _board.LegalPlays().MaxBy(p => p.score).play;
             string s = _board.Play(sCmd);

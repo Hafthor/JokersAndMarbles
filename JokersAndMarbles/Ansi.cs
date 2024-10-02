@@ -8,6 +8,7 @@ public static class Ansi {
         ShowCursor = "\u001b[?25h",
         SaveCursor = "\u001b[s",
         RestoreCursor = "\u001b[u",
+        HomeCursor = "\u001b[H",
         Bold = "\u001b[1m",
         Underline = "\u001b[4m",
         Inverse = "\u001b[7m";

@@ -63,7 +63,7 @@ public class Board {
         .         !    '  .
         ....*.....*.....*..
         """
-        .Split('\n').Select(s => s.ToCharArray().ToImmutableArray()).ToImmutableArray(),
+        .Split(Environment.NewLine).Select(s => s.ToCharArray().ToImmutableArray()).ToImmutableArray(),
         Board6 = """
         ..*.....*.....*.....*.....*.....*....
         .  A    :            K    F         .
@@ -85,7 +85,7 @@ public class Board {
         .         !    '            [    a  .
         ....*.....*.....*.....*.....*.....*..
         """
-        .Split('\n').Select(s => s.ToCharArray().ToImmutableArray()).ToImmutableArray(),
+        .Split(Environment.NewLine).Select(s => s.ToCharArray().ToImmutableArray()).ToImmutableArray(),
         Board8 = """
         ..*.....*.....*.....*.....*.....*....
         .  K    F            U    P         .
@@ -125,7 +125,7 @@ public class Board {
         .         !    '            p    u  .
         ....*.....*.....*.....*.....*.....*..
         """
-        .Split('\n').Select(s => s.ToCharArray().ToImmutableArray()).ToImmutableArray();
+        .Split(Environment.NewLine).Select(s => s.ToCharArray().ToImmutableArray()).ToImmutableArray();
 
     private readonly string[] _info;
     private readonly Deck _deck;
@@ -374,7 +374,7 @@ public class Board {
                     };
                 }
 
-        Console.Clear();
+        Console.Write(Ansi.HomeCursor);
         int il = 0;
         int jAdd = _players.Length > 4 ? 9 + 18 : 9;
         foreach (var line in board) {
