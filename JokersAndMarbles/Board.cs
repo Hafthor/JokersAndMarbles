@@ -34,98 +34,99 @@ public class Board {
     // F   [ \ ] ^ _   a b c d e
     // G   f g h i j   k l m n o
     // H   p q r s t   u v w x y
-    
+
     // legend by player, home/safe, and board position
     private const int LegendHome = 0, LegendSafe = 1;
+
     private static readonly ImmutableArray<ImmutableArray<ImmutableArray<char>>> Legend =
         "!\"#%&.'()+,*01234.56789*:;<=>.ABCDE*FGHIJ.KLMNO*PQRST.UVWXY*[\\]^_.abcde*fghij.klmno*pqrst.uvwxy"
             .Split('*').Select(hs => hs.Split('.').Select(s => s.ToCharArray().ToImmutableArray()).ToImmutableArray())
             .ToImmutableArray();
 
     private static readonly ImmutableArray<ImmutableArray<char>> Board4 = """
-        ..*.....*.....*....
-        .  A    :         .
-        .  B    ;         *
-        .  CDE >=<     MLK.
-        *              N  .
-        .   $          O  .
-        .   $             .
-        .   $          J  .
-        .   $          IGF*
-        .  2$          H  .
-        *013$             .
-        .  4$             .
-        .   $             .
-        .  9$             .
-        .  8              *
-        .567     #%& ,+)  .
-        *         "    (  .
-        .         !    '  .
-        ....*.....*.....*..
-        """
-        .Split(Environment.NewLine).Select(s => s.ToCharArray().ToImmutableArray()).ToImmutableArray(),
+            ..*.....*.....*....
+            .  A    :         .
+            .  B    ;         *
+            .  CDE >=<     MLK.
+            *              N  .
+            .   $          O  .
+            .   $             .
+            .   $          J  .
+            .   $          IGF*
+            .  2$          H  .
+            *013$             .
+            .  4$             .
+            .   $             .
+            .  9$             .
+            .  8              *
+            .567     #%& ,+)  .
+            *         "    (  .
+            .         !    '  .
+            ....*.....*.....*..
+            """
+            .Split(Environment.NewLine).Select(s => s.ToCharArray().ToImmutableArray()).ToImmutableArray(),
         Board6 = """
-        ..*.....*.....*.....*.....*.....*....
-        .  A    :            K    F         .
-        .  B    ;            L    G         *
-        .  CDE >=<           MNO JIH     WVU.
-        *                                X  .
-        .   $                            Y  .
-        .   $                               .
-        .   $                            T  .
-        .   $                            SQP*
-        .  2$                            R  .
-        *013$                               .
-        .  4$                               .
-        .   $                               .
-        .  9$                               .
-        .  8                                *
-        .567     #%& ,+)           ]^_ edc  .
-        *         "    (            \    b  .
-        .         !    '            [    a  .
-        ....*.....*.....*.....*.....*.....*..
-        """
-        .Split(Environment.NewLine).Select(s => s.ToCharArray().ToImmutableArray()).ToImmutableArray(),
+            ..*.....*.....*.....*.....*.....*....
+            .  A    :            K    F         .
+            .  B    ;            L    G         *
+            .  CDE >=<           MNO JIH     WVU.
+            *                                X  .
+            .   $                            Y  .
+            .   $                               .
+            .   $                            T  .
+            .   $                            SQP*
+            .  2$                            R  .
+            *013$                               .
+            .  4$                               .
+            .   $                               .
+            .  9$                               .
+            .  8                                *
+            .567     #%& ,+)           ]^_ edc  .
+            *         "    (            \    b  .
+            .         !    '            [    a  .
+            ....*.....*.....*.....*.....*.....*..
+            """
+            .Split(Environment.NewLine).Select(s => s.ToCharArray().ToImmutableArray()).ToImmutableArray(),
         Board8 = """
-        ..*.....*.....*.....*.....*.....*....
-        .  K    F            U    P         .
-        .  L    G            V    Q         *
-        .  MNO JIH           WXY TSR     cba.
-        *                                d  .
-        .   $                            e  .
-        .   $                               .
-        .   $                            _  .
-        .   $                            ^\[*
-        .  <$                            ]  .
-        *:;=$                               .
-        .  >$                               .
-        .   $                               .
-        .  E$                               .
-        .  D$                               *
-        .ABC$                               .
-        *   $                               .
-        .   $                               .
-        .   $                               .
-        .   $                               .
-        .   $                               *
-        .   $                            mlk.
-        *   $                            n  .
-        .   $                            o  .
-        .   $                               .
-        .   $                            j  .
-        .   $                            igf*
-        .  2$                            h  .
-        *013$                               .
-        .  4$                               .
-        .   $                               .
-        .  9$                               .
-        .  8                                *
-        .567     #%& ,+)           rst yxw  .
-        *         "    (            q    v  .
-        .         !    '            p    u  .
-        ....*.....*.....*.....*.....*.....*..
-        """
-        .Split(Environment.NewLine).Select(s => s.ToCharArray().ToImmutableArray()).ToImmutableArray();
+            ..*.....*.....*.....*.....*.....*....
+            .  K    F            U    P         .
+            .  L    G            V    Q         *
+            .  MNO JIH           WXY TSR     cba.
+            *                                d  .
+            .   $                            e  .
+            .   $                               .
+            .   $                            _  .
+            .   $                            ^\[*
+            .  <$                            ]  .
+            *:;=$                               .
+            .  >$                               .
+            .   $                               .
+            .  E$                               .
+            .  D$                               *
+            .ABC$                               .
+            *   $                               .
+            .   $                               .
+            .   $                               .
+            .   $                               .
+            .   $                               *
+            .   $                            mlk.
+            *   $                            n  .
+            .   $                            o  .
+            .   $                               .
+            .   $                            j  .
+            .   $                            igf*
+            .  2$                            h  .
+            *013$                               .
+            .  4$                               .
+            .   $                               .
+            .  9$                               .
+            .  8                                *
+            .567     #%& ,+)           rst yxw  .
+            *         "    (            q    v  .
+            .         !    '            p    u  .
+            ....*.....*.....*.....*.....*.....*..
+            """
+            .Split(Environment.NewLine).Select(s => s.ToCharArray().ToImmutableArray()).ToImmutableArray();
 
     private readonly string[] _info;
     private readonly Deck _deck;
@@ -413,7 +414,8 @@ public class Board {
 
     private int HomeImbalance(int player) {
         int teammate = (player + _players.Length / 2) % _players.Length;
-        return Math.Abs(_players[player].Marbles.Count(m => m.IsHome) - _players[teammate].Marbles.Count(m => m.IsHome));
+        return Math.Abs(_players[player].Marbles.Count(m => m.IsHome) -
+                        _players[teammate].Marbles.Count(m => m.IsHome));
     }
 
     public int Score() => Score(Turn);

@@ -14,14 +14,12 @@ public class Game(int playerCount, int seed) {
                 Console.WriteLine($"seed={seed}");
                 Console.ReadLine();
                 continue;
-            }
-            if (sCmd == "plays") {
+            } else if (sCmd == "plays") {
                 var plays = _board.LegalPlays().OrderByDescending(p => p.score);
                 Console.WriteLine(string.Join(", ", plays.Select(p => $"{p.play}={p.score}")));
                 Console.ReadLine();
                 continue;
-            }
-            if (sCmd == "fullauto") {
+            } else if (sCmd == "fullauto") {
                 fullAuto = true;
                 sCmd = "auto";
             }

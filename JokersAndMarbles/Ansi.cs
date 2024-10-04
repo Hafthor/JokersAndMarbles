@@ -12,6 +12,7 @@ public static class Ansi {
         Bold = "\u001b[1m",
         Underline = "\u001b[4m",
         Inverse = "\u001b[7m";
+
     public static string MoveCursor(int row, int col) => $"\u001b[{row};{col}H";
 
     public static readonly string Black = "\u001b[30m",
