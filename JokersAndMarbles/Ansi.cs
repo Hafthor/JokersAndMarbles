@@ -4,6 +4,7 @@ public static class Ansi {
     public static readonly string Reset = "\u001b[0m",
         ClearScreen = "\u001b[2J\u001b[0;0H",
         ClearLine = "\u001b[2K",
+        ClearRestOfLine = "\u001b[K",
         HideCursor = "\u001b[?25l",
         ShowCursor = "\u001b[?25h",
         SaveCursor = "\u001b[s",

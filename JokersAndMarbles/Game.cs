@@ -7,7 +7,7 @@ public class Game(int playerCount, int seed) {
         for (bool fullAuto = false;;) {
             _board.Paint();
             string clr = Marble.ColorForPlayer(_board.Turn, playerCount);
-            Console.Write($"{clr}Player {_board.Turn}[{_board.Score()}]{Ansi.Reset} ({_board.Hand()}):     \b\b\b\b\b");
+            Console.Write($"{clr}Player {_board.Turn}[{_board.Score()}]{Ansi.Reset} ({_board.Hand()}): {Ansi.ClearRestOfLine}");
             string sCmd = fullAuto ? "auto" : Console.ReadLine() ?? "";
             if (sCmd is "exit" or "quit") break;
             if (sCmd is "seed") {
