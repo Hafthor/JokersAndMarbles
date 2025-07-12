@@ -486,9 +486,11 @@ public class Board {
                     _players[Turn].Hand[i] = saveCards[i];
             }
         }
-        int discardScore = Score() - 1000;
-        foreach (var c in saveCards)
-            plays.Add(($"{c} x", discardScore - c.Worth)); // discard
+        if (plays.Count == 0) {
+            int discardScore = Score();
+            foreach (var c in saveCards)
+                plays.Add(($"{c} x", discardScore - c.Worth)); // discard
+        }
         return plays;
     }
 }
