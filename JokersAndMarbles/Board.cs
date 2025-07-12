@@ -455,8 +455,7 @@ public class Board {
             if (card.IsJoker)
                 foreach (var m1 in allMarbles) {
                     foreach (var m2 in allMarbles)
-                        if (m1.Player == m2.Player)
-                            yield return $"{card} {m1.Letter}{m2.Letter}";
+                        yield return $"{card} {m1.Letter}{m2.Letter}";
                     if (m1.IsHome)
                         yield return $"{card} {m1.Letter}";
                 }
