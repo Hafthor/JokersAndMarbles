@@ -39,146 +39,142 @@ public class Board {
     private const int LegendHome = 0, LegendSafe = 1;
 
     private static readonly ImmutableArray<ImmutableArray<ImmutableArray<char>>> Legend =
-        "!\"#%&.'()+,*01234.56789*:;<=>.ABCDE*FGHIJ.KLMNO*PQRST.UVWXY*[\\]^_.abcde*fghij.klmno*pqrst.uvwxy"
-            .Split('*').Select(hs => hs.Split('.').Select(s => s.ToCharArray().ToImmutableArray()).ToImmutableArray())
-            .ToImmutableArray();
+        [.."!\"#%&.'()+,*01234.56789*:;<=>.ABCDE*FGHIJ.KLMNO*PQRST.UVWXY*[\\]^_.abcde*fghij.klmno*pqrst.uvwxy"
+            .Split('*').Select(hs => hs.Split('.').Select(s => s.ToCharArray().ToImmutableArray()).ToImmutableArray())];
 
-    private static readonly ImmutableArray<ImmutableArray<char>> Board4 = """
-            ..*.....*.....*....
-            .  A    :         .
-            .  B    ;         *
-            .  CDE >=<     MLK.
-            *              N  .
-            .   $          O  .
-            .   $             .
-            .   $          J  .
-            .   $          IGF*
-            .  2$          H  .
-            *013$             .
-            .  4$             .
-            .   $             .
-            .  9$             .
-            .  8              *
-            .567     #%& ,+)  .
-            *         "    (  .
-            .         !    '  .
-            ....*.....*.....*..
-            """
-            .Split(Environment.NewLine).Select(s => s.ToCharArray().ToImmutableArray()).ToImmutableArray(),
-        Board6 = """
-            ..*.....*.....*.....*.....*.....*....
-            .  A    :            K    F         .
-            .  B    ;            L    G         *
-            .  CDE >=<           MNO JIH     WVU.
-            *                                X  .
-            .   $                            Y  .
-            .   $                               .
-            .   $                            T  .
-            .   $                            SQP*
-            .  2$                            R  .
-            *013$                               .
-            .  4$                               .
-            .   $                               .
-            .  9$                               .
-            .  8                                *
-            .567     #%& ,+)           ]^_ edc  .
-            *         "    (            \    b  .
-            .         !    '            [    a  .
-            ....*.....*.....*.....*.....*.....*..
-            """
-            .Split(Environment.NewLine).Select(s => s.ToCharArray().ToImmutableArray()).ToImmutableArray(),
-        Board8 = """
-            ..*.....*.....*.....*.....*.....*....
-            .  K    F            U    P         .
-            .  L    G            V    Q         *
-            .  MNO JIH           WXY TSR     cba.
-            *                                d  .
-            .   $                            e  .
-            .   $                               .
-            .   $                            _  .
-            .   $                            ^\[*
-            .  <$                            ]  .
-            *:;=$                               .
-            .  >$                               .
-            .   $                               .
-            .  E$                               .
-            .  D$                               *
-            .ABC$                               .
-            *   $                               .
-            .   $                               .
-            .   $                               .
-            .   $                               .
-            .   $                               *
-            .   $                            mlk.
-            *   $                            n  .
-            .   $                            o  .
-            .   $                               .
-            .   $                            j  .
-            .   $                            igf*
-            .  2$                            h  .
-            *013$                               .
-            .  4$                               .
-            .   $                               .
-            .  9$                               .
-            .  8                                *
-            .567     #%& ,+)           rst yxw  .
-            *         "    (            q    v  .
-            .         !    '            p    u  .
-            ....*.....*.....*.....*.....*.....*..
-            """
-            .Split(Environment.NewLine).Select(s => s.ToCharArray().ToImmutableArray()).ToImmutableArray();
+    private static readonly ImmutableArray<ImmutableArray<char>> Board4 = [.."""
+                ..*.....*.....*....
+                .  A    :         .
+                .  B    ;         *
+                .  CDE >=<     MLK.
+                *              N  .
+                .   $          O  .
+                .   $             .
+                .   $          J  .
+                .   $          IGF*
+                .  2$          H  .
+                *013$             .
+                .  4$             .
+                .   $             .
+                .  9$             .
+                .  8              *
+                .567     #%& ,+)  .
+                *         "    (  .
+                .         !    '  .
+                ....*.....*.....*..
+                """.Split(Environment.NewLine).Select(s => s.ToCharArray().ToImmutableArray())],
+        Board6 = [.."""
+                ..*.....*.....*.....*.....*.....*....
+                .  A    :            K    F         .
+                .  B    ;            L    G         *
+                .  CDE >=<           MNO JIH     WVU.
+                *                                X  .
+                .   $                            Y  .
+                .   $                               .
+                .   $                            T  .
+                .   $                            SQP*
+                .  2$                            R  .
+                *013$                               .
+                .  4$                               .
+                .   $                               .
+                .  9$                               .
+                .  8                                *
+                .567     #%& ,+)           ]^_ edc  .
+                *         "    (            \    b  .
+                .         !    '            [    a  .
+                ....*.....*.....*.....*.....*.....*..
+                """.Split(Environment.NewLine).Select(s => s.ToCharArray().ToImmutableArray())],
+        Board8 = [.."""
+                ..*.....*.....*.....*.....*.....*....
+                .  K    F            U    P         .
+                .  L    G            V    Q         *
+                .  MNO JIH           WXY TSR     cba.
+                *                                d  .
+                .   $                            e  .
+                .   $                               .
+                .   $                            _  .
+                .   $                            ^\[*
+                .  <$                            ]  .
+                *:;=$                               .
+                .  >$                               .
+                .   $                               .
+                .  E$                               .
+                .  D$                               *
+                .ABC$                               .
+                *   $                               .
+                .   $                               .
+                .   $                               .
+                .   $                               .
+                .   $                               *
+                .   $                            mlk.
+                *   $                            n  .
+                .   $                            o  .
+                .   $                               .
+                .   $                            j  .
+                .   $                            igf*
+                .  2$                            h  .
+                *013$                               .
+                .  4$                               .
+                .   $                               .
+                .  9$                               .
+                .  8                                *
+                .567     #%& ,+)           rst yxw  .
+                *         "    (            q    v  .
+                .         !    '            p    u  .
+                ....*.....*.....*.....*.....*.....*..
+                """.Split(Environment.NewLine).Select(s => s.ToCharArray().ToImmutableArray())];
 
-    private readonly string[] _info;
-    private readonly Deck _deck;
-    private readonly Dictionary<char, (int y, int x)> _positionForChar = new();
-    private readonly Player[] _players;
-    private readonly ImmutableArray<ImmutableArray<char>> _board;
+    private readonly string[] info;
+    private readonly Deck deck;
+    private readonly Dictionary<char, (int y, int x)> coord = new();
+    private readonly Player[] players;
+    private readonly ImmutableArray<ImmutableArray<char>> board;
 
     public int Turn { get; private set; }
-    public int Teammate => (Turn + _players.Length / 2) % _players.Length;
-    public bool Win => _players[Turn].Marbles.All(m => m.IsSafe) && _players[Teammate].Marbles.All(m => m.IsSafe);
+    private int Teammate => (Turn + players.Length / 2) % players.Length;
+    public bool Win => players[Turn].Marbles.All(m => m.IsSafe) && players[Teammate].Marbles.All(m => m.IsSafe);
 
     public Board(int playerCount, Deck deck) {
-        _players = new Player[playerCount];
-        _board = playerCount switch {
+        players = new Player[playerCount];
+        board = playerCount switch {
             4 => Board4,
             6 => Board6,
             8 => Board8,
             _ => throw new ArgumentException("Invalid player count")
         };
-        int infoLines = _board.Count(b => b.Contains('$'));
-        _info = new string[infoLines];
-        _deck = deck;
+        int infoLines = board.Count(b => b.Contains('$'));
+        info = new string[infoLines];
+        this.deck = deck;
         for (int p = 0, m = 0, l = playerCount / 2, t = l; p < l;) {
-            _players[p] = new Player(p++, deck, Marble.MarbleLettersByTeams[m++], _players.Length);
-            _players[t] = new Player(t++, deck, Marble.MarbleLettersByTeams[m++], _players.Length);
+            players[p] = new Player(p++, deck, Marble.MarbleLettersByTeams[m++], players.Length);
+            players[t] = new Player(t++, deck, Marble.MarbleLettersByTeams[m++], players.Length);
         }
-        Array.Fill(_info, "");
+        Array.Fill(info, "");
         //     1234567890123456789
         Print("Jokers and Marbles");
 
-        for (int r = 0; r < _board.Length; r++) {
-            var row = _board[r];
+        for (int r = 0; r < board.Length; r++) {
+            var row = board[r];
             for (int c = 0; c < row.Length; c++)
                 if (row[c] is not ' ' and not '.' and not '*' and not '$')
-                    _positionForChar[row[c]] = (y: r, x: c);
+                    coord[row[c]] = (y: r, x: c);
         }
     }
 
     public void Print(string s) {
-        int w = _players.Length > 4 ? 19 + 18 + 18 : 19;
+        int w = players.Length > 4 ? 19 + 18 + 18 : 19;
         while (s.Length > 0) {
-            Array.Copy(_info, 1, _info, 0, _info.Length - 1);
-            _info[^1] = s.PadRight(w)[..w];
+            Array.Copy(info, 1, info, 0, info.Length - 1);
+            info[^1] = s.PadRight(w)[..w];
             s = s.Length > w ? s[w..] : "";
         }
     }
 
-    public void NextTurn() => Turn = (Turn + 1) % _players.Length;
+    private void NextTurn() => Turn = (Turn + 1) % players.Length;
 
-    public List<Marble> AllMarbles() => _players.SelectMany(p => p.Marbles).ToList();
+    private List<Marble> AllMarbles() => players.SelectMany(p => p.Marbles).ToList();
 
-    public List<Marble> TeamMarbles() => _players[Turn].Marbles.Concat(_players[Teammate].Marbles).ToList();
+    private List<Marble> TeamMarbles() => players[Turn].Marbles.Concat(players[Teammate].Marbles).ToList();
 
 
     public string Play(string sCmd, bool quiet = false) {
@@ -192,14 +188,14 @@ public class Board {
         // 6s x - means discard Six of Spades, draw new card
         if (!quiet) Print($"P{Turn}: {sCmd}");
         string[] ss = sCmd.Split(' ');
-        if (ss.Length < 2 || ss.Length > 3)
+        if (ss.Length is < 2 or > 3)
             return $"Bad command {sCmd}";
         string[] moves = ss[1..];
         bool splitMove = moves.Length > 1;
-        Card card = _players[Turn].Hand.FirstOrDefault(c => c.ToString() == ss[0], default);
+        Card card = players[Turn].Hand.FirstOrDefault(c => c.ToString() == ss[0]);
         if (card == null) return $"Bad card {ss[0]}";
         if (!splitMove && moves[0] == "x") { // discard
-            Card newCard = _players[Turn].UseAndDraw(_deck, card);
+            Card newCard = players[Turn].UseAndDraw(deck, card);
             if (!quiet) Print($"Discard {card}, draw {newCard}");
             NextTurn();
             return null;
@@ -213,15 +209,16 @@ public class Board {
 
         // save current state
         Marble[][] saveMarbles = SaveMarbles();
-        List<string> messages = new();
+        List<string> messages = [];
         try {
             int prevMove = 0;
             Marble prevMarble = null;
-            for (int moveIndex = 0, curMove; moveIndex < moves.Length; moveIndex++) {
+            for (int moveIndex = 0; moveIndex < moves.Length; moveIndex++) {
                 string move = moves[moveIndex];
-                Marble marble = marbles.FirstOrDefault(m => m.Letter == move[0], default);
+                Marble marble = marbles.FirstOrDefault(m => m.Letter == move[0]);
                 if (marble == null) return $"Bad marble {move[0]}";
                 bool hostile = card.Rank == Rank.Ten && teamMarbles.All(m => m.Letter != move[0]);
+                int curMove;
                 if (move.Length == 1) { // infer move
                     if (card.Rank is Rank.Ten || card.Rank is Rank.Seven or Rank.Nine && splitMove && moveIndex == 0)
                         return $"Give distances for {card.Rank}";
@@ -231,13 +228,13 @@ public class Board {
                         if (card.IsAceOrFace)
                             curMove = Marble.Start - Marble.Home;
                         else if (card.IsJoker)
-                            curMove = Marble.Side * _players.Length / 2 - Marble.Home; // opposite start
+                            curMove = Marble.Side * players.Length / 2 - Marble.Home; // opposite start
                         else
                             return $"Can't exit home w/ {card.Rank}";
                 } else { // move specified
                     Marble click = card.Rank != Rank.Joker
                         ? null
-                        : _players.SelectMany(p => p.Marbles).FirstOrDefault(m => m.Letter == move[1], default);
+                        : players.SelectMany(p => p.Marbles).FirstOrDefault(m => m.Letter == move[1]);
                     if (click != null) {
                         if (click.IsHome) return "Can't click home marble";
                         if (click.IsSafe) return "Can't click safe marble";
@@ -278,7 +275,7 @@ public class Board {
                 }
 
                 string s = marble.Move(curMove, hostile,
-                    marble.IsHome || card.IsJoker ? null : _players[marble.Player].Marbles);
+                    marble.IsHome || card.IsJoker ? null : players[marble.Player].Marbles);
                 if (s != null) return s;
 
                 // chain of clicks
@@ -320,7 +317,7 @@ public class Board {
                 prevMove = curMove;
                 prevMarble = marble;
             }
-            Card newCard = _players[Turn].UseAndDraw(_deck, card);
+            Card newCard = players[Turn].UseAndDraw(deck, card);
             messages.Add($"{card} used, draw {newCard}");
             saveMarbles = null; // prevent rollback
         } finally {
@@ -336,15 +333,15 @@ public class Board {
     }
 
     public void Paint() {
-        int infoWidth = _players.Length > 4 ? 19 + 18 + 18 : 19;
-        for (int i = 0; i < _info.Length; i++)
-            _info[i] = (_info[i] ?? "").PadRight(infoWidth)[..infoWidth];
-        var board = _board.Select(row => row.ToArray()).ToArray();
-        foreach (var e in _positionForChar)
-            board[e.Value.y][e.Value.x] = '.';
+        int infoWidth = players.Length > 4 ? 19 + 18 + 18 : 19;
+        for (int i = 0; i < info.Length; i++)
+            info[i] = (info[i] ?? "").PadRight(infoWidth)[..infoWidth];
+        var curBoard = board.Select(row => row.ToArray()).ToArray();
+        foreach (var e in coord)
+            curBoard[e.Value.y][e.Value.x] = '.';
 
-        for (int i = 0; i < _players.Length; i++)
-            foreach (var m in _players[i].Marbles)
+        for (int i = 0; i < players.Length; i++)
+            foreach (var m in players[i].Marbles)
                 if (m.IsSafe)
                     FindAndSet(Legend[i][LegendSafe][m.Position - m.Entry - 1], m.Letter);
                 else if (m.IsHome)
@@ -352,39 +349,38 @@ public class Board {
                 else {
                     char c = m.Letter;
                     int p = (m.AbsPosition + m.Max - 10) % m.Max;
-                    _ = _players.Length switch {
+                    _ = players.Length switch {
                         4 => _ = (p / Marble.Side) switch {
-                            0 => board[Marble.Side - p][0] = c, // left
-                            1 => board[0][p - Marble.Side] = c, // top
-                            2 => board[p - Marble.Side * 2][^1] = c, // right
-                            _ => board[^1][m.Max - p] = c // bottom
+                            0 => curBoard[Marble.Side - p][0] = c, // left
+                            1 => curBoard[0][p - Marble.Side] = c, // top
+                            2 => curBoard[p - Marble.Side * 2][^1] = c, // right
+                            _ => curBoard[^1][m.Max - p] = c // bottom
                         },
                         6 => _ = (p / Marble.Side) switch { // double wide
-                            0 => board[Marble.Side - p][0] = c, // left
-                            1 or 2 => board[0][p - Marble.Side] = c, // top
-                            3 => board[p - Marble.Side * 3][^1] = c, // right
-                            _ => board[^1][m.Max - p] = c // bottom
+                            0 => curBoard[Marble.Side - p][0] = c, // left
+                            1 or 2 => curBoard[0][p - Marble.Side] = c, // top
+                            3 => curBoard[p - Marble.Side * 3][^1] = c, // right
+                            _ => curBoard[^1][m.Max - p] = c // bottom
                         },
                         8 => _ = (p / Marble.Side / 2) switch {
-                            0 => board[Marble.Side * 2 - p][0] = c, // left
-                            1 => board[0][p - Marble.Side * 2] = c, // top
-                            2 => board[p - Marble.Side * 4][^1] = c, // right
-                            _ => board[^1][m.Max - p] = c // bottom
+                            0 => curBoard[Marble.Side * 2 - p][0] = c, // left
+                            1 => curBoard[0][p - Marble.Side * 2] = c, // top
+                            2 => curBoard[p - Marble.Side * 4][^1] = c, // right
+                            _ => curBoard[^1][m.Max - p] = c // bottom
                         },
                         _ => throw new ArgumentException("Invalid player count")
                     };
                 }
 
         Console.Write(Ansi.HomeCursor);
-        int il = 0;
-        int jAdd = _players.Length > 4 ? 9 + 18 : 9;
-        foreach (var line in board) {
+        int il = 0, jAdd = players.Length > 4 ? 9 + 18 : 9;
+        foreach (var line in curBoard) {
             for (var j = 0; j < line.Length; j++) {
                 var c = line[j];
                 if (c == '$') {
                     j += jAdd;
                     Console.Write(' ');
-                    Console.Write(_info[il++].PadRight(infoWidth)[..infoWidth]);
+                    Console.Write(info[il++].PadRight(infoWidth)[..infoWidth]);
                 } else {
                     if (char.IsLetter(c)) Console.Write(Marble.ColorForLetter(c) + c + Ansi.Reset);
                     else Console.Write(c);
@@ -395,39 +391,37 @@ public class Board {
         }
 
         bool FindAndSet(char find, char set) {
-            if (_positionForChar.TryGetValue(find, out var xy) && board[xy.y][xy.x] == '.') {
-                board[xy.y][xy.x] = set;
-                return true;
-            }
-            return false;
+            if (!coord.TryGetValue(find, out var xy) || curBoard[xy.y][xy.x] != '.') return false;
+            curBoard[xy.y][xy.x] = set;
+            return true;
         }
     }
 
-    public int Score(int player) {
-        int teammate = (player + _players.Length / 2) % _players.Length, score = 0;
-        for (int i = 0; i < _players.Length; i++)
-            score += i == player || i == teammate ? _players[i].Score() : -_players[i].Score();
-        for (int i = 0; i < _players.Length / 2; i++)
+    private int Score(int player) {
+        int teammate = (player + players.Length / 2) % players.Length, score = 0;
+        for (int i = 0; i < players.Length; i++)
+            score += i == player || i == teammate ? players[i].Score() : -players[i].Score();
+        for (int i = 0; i < players.Length / 2; i++)
             score += i == player || i == teammate ? -HomeImbalance(i) : HomeImbalance(i);
         return score;
     }
 
     private int HomeImbalance(int player) {
-        int teammate = (player + _players.Length / 2) % _players.Length;
-        return Math.Abs(_players[player].Marbles.Count(m => m.IsHome) -
-                        _players[teammate].Marbles.Count(m => m.IsHome));
+        int teammate = (player + players.Length / 2) % players.Length;
+        return Math.Abs(players[player].Marbles.Count(m => m.IsHome) -
+                        players[teammate].Marbles.Count(m => m.IsHome));
     }
 
     public int Score() => Score(Turn);
 
-    public string Hand() => string.Join(',', _players[Turn].Hand.ToList());
+    public string Hand() => string.Join(',', players[Turn].Hand);
 
-    private Marble[][] SaveMarbles() => _players.Select((p, i) =>
-        p.Marbles.Select(m => new Marble(m.Letter, i, _players.Length) { Position = m.Position }).ToArray()).ToArray();
+    private Marble[][] SaveMarbles() => players.Select((p, i) =>
+        p.Marbles.Select(m => new Marble(m.Letter, i, players.Length) { Position = m.Position }).ToArray()).ToArray();
 
     private void RestoreMarbles(Marble[][] saveMarbles) {
-        for (int p = 0; p < _players.Length; p++) {
-            Marble[] player = _players[p].Marbles, savePlayer = saveMarbles[p];
+        for (int p = 0; p < players.Length; p++) {
+            Marble[] player = players[p].Marbles, savePlayer = saveMarbles[p];
             for (int i = 0; i < player.Length; i++)
                 player[i].Position = savePlayer[i].Position;
         }
@@ -435,7 +429,7 @@ public class Board {
 
     private IEnumerable<string> PossiblePlays() { // not including discard
         List<Marble> allMarbles = AllMarbles(), teamMarbles = TeamMarbles();
-        foreach (var card in _players[Turn].Hand.ToArray()) {
+        foreach (var card in players[Turn].Hand.ToArray()) {
             int mi1 = 0;
             if (card.CanSplit)
                 if (!card.MustSplit)
@@ -468,9 +462,9 @@ public class Board {
 
     public List<(string play, int score)> LegalPlays() {
         Marble[][] saveState = SaveMarbles();
-        List<Card> saveCards = new(_players[Turn].Hand), saveDeck = _deck.SaveCards();
+        List<Card> saveCards = [..players[Turn].Hand], saveDeck = deck.SaveCards();
         int saveTurn = Turn;
-        List<(string play, int score)> plays = new();
+        List<(string play, int score)> plays = [];
         foreach (string play in PossiblePlays()) {
             string err = Play(play, true);
             if (err == null) {
@@ -479,10 +473,10 @@ public class Board {
                 Turn = saveTurn;
                 plays.Add((play, Score() - card.Worth));
                 // restore state
-                _deck.RestoreCards(saveDeck);
+                deck.RestoreCards(saveDeck);
                 RestoreMarbles(saveState);
                 for (int i = 0; i < saveCards.Count; i++)
-                    _players[Turn].Hand[i] = saveCards[i];
+                    players[Turn].Hand[i] = saveCards[i];
             }
         }
         if (plays.Count == 0) {

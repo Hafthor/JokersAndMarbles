@@ -1,54 +1,54 @@
 namespace JokersAndMarbles;
 
 public static class Ansi {
-    public static readonly string Reset = "\u001b[0m",
-        ClearScreen = "\u001b[2J\u001b[0;0H",
-        ClearLine = "\u001b[2K",
-        ClearRestOfLine = "\u001b[K",
-        HideCursor = "\u001b[?25l",
-        ShowCursor = "\u001b[?25h",
-        SaveCursor = "\u001b[s",
-        RestoreCursor = "\u001b[u",
-        HomeCursor = "\u001b[H",
-        Bold = "\u001b[1m",
-        Underline = "\u001b[4m",
-        Inverse = "\u001b[7m";
+    public static readonly string Reset = "\e[0m",
+        ClearScreen = "\e[2J\e[0;0H",
+        ClearLine = "\e[2K",
+        ClearRestOfLine = "\e[K",
+        HideCursor = "\e[?25l",
+        ShowCursor = "\e[?25h",
+        SaveCursor = "\e[s",
+        RestoreCursor = "\e[u",
+        HomeCursor = "\e[H",
+        Bold = "\e[1m",
+        Underline = "\e[4m",
+        Inverse = "\e[7m";
 
-    public static string MoveCursor(int row, int col) => $"\u001b[{row};{col}H";
+    public static string MoveCursor(int row, int col) => $"\e[{row};{col}H";
 
-    public static readonly string Black = "\u001b[30m",
-        Red = "\u001b[31m",
-        Green = "\u001b[32m",
-        Brown = "\u001b[33m",
-        Blue = "\u001b[34m",
-        Magenta = "\u001b[35m",
-        Cyan = "\u001b[36m",
-        White = "\u001b[37m";
+    public static readonly string Black = "\e[30m",
+        Red = "\e[31m",
+        Green = "\e[32m",
+        Brown = "\e[33m",
+        Blue = "\e[34m",
+        Magenta = "\e[35m",
+        Cyan = "\e[36m",
+        White = "\e[37m";
 
-    public static readonly string BlackBg = "\u001b[40m",
-        RedBg = "\u001b[41m",
-        GreenBg = "\u001b[42m",
-        BrownBg = "\u001b[43m",
-        BlueBg = "\u001b[44m",
-        MagentaBg = "\u001b[45m",
-        CyanBg = "\u001b[46m",
-        WhiteBg = "\u001b[47m";
+    public static readonly string BlackBg = "\e[40m",
+        RedBg = "\e[41m",
+        GreenBg = "\e[42m",
+        BrownBg = "\e[43m",
+        BlueBg = "\e[44m",
+        MagentaBg = "\e[45m",
+        CyanBg = "\e[46m",
+        WhiteBg = "\e[47m";
 
-    public static readonly string BBlack = "\u001b[90m",
-        BRed = "\u001b[91m",
-        BGreen = "\u001b[92m",
-        Yellow = "\u001b[93m",
-        BBlue = "\u001b[94m",
-        Pink = "\u001b[95m",
-        BCyan = "\u001b[96m",
-        BWhite = "\u001b[97m";
+    public static readonly string BBlack = "\e[90m",
+        BRed = "\e[91m",
+        BGreen = "\e[92m",
+        Yellow = "\e[93m",
+        BBlue = "\e[94m",
+        Pink = "\e[95m",
+        BCyan = "\e[96m",
+        BWhite = "\e[97m";
 
-    public static readonly string BBlackBg = "\u001b[100m",
-        BRedBg = "\u001b[101m",
-        BGreenBg = "\u001b[102m",
-        YellowBg = "\u001b[103m",
-        BBlueBg = "\u001b[104m",
-        PinkBg = "\u001b[105m",
-        BCyanBg = "\u001b[106m",
-        BWhiteBg = "\u001b[107m";
+    public static readonly string BBlackBg = "\e[100m",
+        BRedBg = "\e[101m",
+        BGreenBg = "\e[102m",
+        YellowBg = "\e[103m",
+        BBlueBg = "\e[104m",
+        PinkBg = "\e[105m",
+        BCyanBg = "\e[106m",
+        BWhiteBg = "\e[107m";
 }

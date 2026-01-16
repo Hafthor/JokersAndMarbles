@@ -1,7 +1,7 @@
 namespace JokersAndMarbles;
 
 public class Marble(char letter, int player, int playerCount) {
-    public static readonly string[] ColorsByTeams = [
+    private static readonly string[] ColorsByTeams = [
             Ansi.BlueBg + Ansi.BWhite,
             Ansi.BBlueBg + Ansi.Black,
             Ansi.GreenBg + Ansi.BWhite,
@@ -10,8 +10,9 @@ public class Marble(char letter, int player, int playerCount) {
             Ansi.BRedBg + Ansi.Black,
             Ansi.BBlackBg + Ansi.BWhite,
             Ansi.WhiteBg + Ansi.Black
-        ],
-        MarbleLettersByTeams = ["ABCDE", "FGHIJ", "abcde", "fghij", "KLMNO", "PQRST", "klmno", "pqrst"];
+        ];
+
+    public static readonly string[] MarbleLettersByTeams = ["ABCDE", "FGHIJ", "abcde", "fghij", "KLMNO", "PQRST", "klmno", "pqrst"];
 
     public const int Home = -5, Start = 0, Side = 18, Limbos = 4;
     public readonly int Max = playerCount * Side, Entry = playerCount * Side - 5;
